@@ -39,7 +39,6 @@
         android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
         android:hint="Currency"
-        android:inputType="textEmailAddress"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/rb_buy_transaction"/>
