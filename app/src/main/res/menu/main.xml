@@ -3,7 +3,8 @@
       xmlns:tools="http://schemas.android.com/tools"
       tools:context="com.nagy.zsolt.luna.ui.MainActivity">
     <item
-        android:id="@+id/action_settings"
-        android:orderInCategory="100"
-        android:title="@string/action_settings"/>
+        android:id="@+id/action_drawer"
+        android:title="Drawer"
+        android:icon="@drawable/ic_drawer"
+        app:showAsAction="always" />
 </menu>

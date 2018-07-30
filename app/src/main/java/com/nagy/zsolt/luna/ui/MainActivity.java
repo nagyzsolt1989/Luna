@@ -23,6 +23,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -43,17 +44,23 @@ import butterknife.Optional;
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-    @Nullable @BindView(R.id.lv_portfolio)
+    @Nullable
+    @BindView(R.id.lv_portfolio)
     ListView mPortfolioListView;
-    @Nullable @BindView(R.id.toolbar)
+    @Nullable
+    @BindView(R.id.toolbar)
     Toolbar mToolbar;
-    @Nullable @BindView(R.id.drawer_layout)
+    @Nullable
+    @BindView(R.id.drawer_layout)
     DrawerLayout mDrawer;
-    @Nullable @BindView(R.id.nav_view)
+    @Nullable
+    @BindView(R.id.nav_view)
     NavigationView navigationView;
-    @Nullable @BindView(R.id.fab)
+    @Nullable
+    @BindView(R.id.fab)
     FloatingActionButton fab;
-    @Nullable @BindView(R.id.currency)
+    @Nullable
+    @BindView(R.id.currency)
     EditText mTransactionCurrency;
     private List<String> mPortfolioValues;
     private ArrayAdapter<String> adapter;
@@ -87,7 +94,7 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
-        mPortfolioValues = new ArrayList<String>(Arrays.asList( "Android", "iPhone", "WindowsMobile",
+        mPortfolioValues = new ArrayList<String>(Arrays.asList("Android", "iPhone", "WindowsMobile",
                 "Blackberry"));
 
         adapter = new ArrayAdapter<String>(this,
@@ -118,19 +125,12 @@ public class MainActivity extends AppCompatActivity
                             }
                         });
         mPortfolioListView.setOnTouchListener(touchListener);
-//        mPortfolioListView.setOnClickListener();
-    }
-
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent e) {
-        if (keyCode == KeyEvent.KEYCODE_MENU) {
-            // your action...
-
-            if (mDrawer.isDrawerOpen(GravityCompat.START)) {
-                mDrawer.closeDrawer(GravityCompat.START);}
-            return true;
-        }
-        return super.onKeyDown(keyCode, e);
+        mPortfolioListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
+                launchDetailActivity(position);
+            }
+        });
     }
 
     @Override
@@ -157,11 +157,15 @@ public class MainActivity extends AppCompatActivity
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
+        if (id == R.id.action_drawer) {
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            mDrawer.openDrawer(Gravity.LEFT);
-            toggle.syncState();
+            if (!mDrawer.isDrawerOpen(Gravity.LEFT)) {
+                mDrawer.openDrawer(Gravity.LEFT);
+                toggle.syncState();
+            } else {
+                mDrawer.closeDrawer(Gravity.LEFT);
+                toggle.syncState();
+            }
             return true;
         }
 
@@ -177,19 +181,23 @@ public class MainActivity extends AppCompatActivity
         if (id == R.id.nav_gallery) {
 
         } else if (id == R.id.nav_slideshow) {
+            Intent intent = new Intent(this, MarketActivity.class);
+            startActivity(intent);
+            this.overridePendingTransition(R.anim.slide_from_right, R.anim.fade_out);
 
         } else if (id == R.id.nav_manage) {
+            Intent intent = new Intent(this, SettingsActivity.class);
+            startActivity(intent);
+            this.overridePendingTransition(R.anim.slide_from_right, R.anim.fade_out);
         }
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        drawer.closeDrawer(GravityCompat.START);
         return true;
     }
 
     private void showTransactionDialog() {
 
         LayoutInflater inflater = LayoutInflater.from(this);
-        View dialog_layout = inflater.inflate(R.layout.dialog_transaction,(ViewGroup) findViewById(R.id.dialog_linear_layout));
+        View dialog_layout = inflater.inflate(R.layout.dialog_transaction, (ViewGroup) findViewById(R.id.dialog_linear_layout));
 
         AlertDialog.Builder db = new AlertDialog.Builder(this);
         ButterKnife.bind(this, dialog_layout);
@@ -214,10 +222,10 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void launchDetailActivity(int position) {
-//        Intent intent = new Intent(this, DetailActivity.class);
-//        intent.putExtra(Constants.EXTRA_POSITION, position);
-//        intent.putExtra(Constants.EXTRA_CURRENCY, );
-//        startActivity(intent);
-//        this.overridePendingTransition(R.anim.slide_from_right, R.anim.fade_out);
+        Intent intent = new Intent(this, DetailActivity.class);
+        intent.putExtra(Constants.EXTRA_POSITION, position);
+        intent.putExtra(Constants.EXTRA_CURRENCY, mPortfolioValues.get(position).toString());
+        startActivity(intent);
+        this.overridePendingTransition(R.anim.slide_from_right, R.anim.fade_out);
     }
 }

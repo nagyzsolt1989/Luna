@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<android.support.constraint.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context=".ui.MainActivity"
+    tools:showIn="@layout/app_bar_main">
+
+    <android.support.design.widget.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:theme="@style/AppTheme.AppBarOverlay">
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            app:popupTheme="@style/AppTheme.PopupOverlay">
+
+            <TextView
+                android:id="@+id/toolbar_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/blackjar"
+                android:paddingLeft="12dp"
+                android:paddingTop="8dp"
+                android:text="@string/app_name"
+                android:textColor="@color/white"
+                android:textSize="26sp"
+                android:textStyle="bold|italic"/>
+
+        </android.support.v7.widget.Toolbar>
+
+    </android.support.design.widget.AppBarLayout>
+
+    <FrameLayout
+        android:id="@+id/photo_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:id="@+id/iv_moon"
+            android:layout_width="match_parent"
+            android:layout_height="310dp"
+            android:layout_marginTop="?attr/actionBarSize"
+            android:background="@drawable/moon"
+            android:scaleType="centerCrop"/>
+
+    </FrameLayout>
+
+    <TextView
+        android:id="@+id/tv_crypto_currency"
+        style="@style/Base.TextAppearance.AppCompat.Title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:padding="8dp"
+        android:text="Crypto Currency"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/photo_container"/>
+
+    <android.support.v7.widget.GridLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:grid="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/choice_grid"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:padding="4dp"
+        grid:alignmentMode="alignBounds"
+        grid:columnCount="3"
+        grid:rowOrderPreserved="false"
+        grid:useDefaultMargins="true"
+        grid:layout_constraintTop_toBottomOf="@id/tv_crypto_currency">
+
+        <TextView
+            android:id="@+id/tv_last"
+            android:text="Last"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            grid:layout_columnWeight="1"
+            android:gravity="center"
+            grid:layout_gravity="fill_horizontal"/>
+
+        <TextView
+            android:id="@+id/tv_last_value"
+            android:text="Last"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            grid:layout_columnWeight="1"
+            android:gravity="center"
+            grid:layout_gravity="fill_horizontal"
+            />
+
+        <TextView
+            android:id="@+id/tv_high"
+            android:text="High"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            grid:layout_columnWeight="1"
+            android:gravity="center"
+            grid:layout_gravity="fill_horizontal"
+            />
+
+        <TextView
+            android:id="@+id/tv_high_value"
+            android:text="High"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            grid:layout_columnWeight="1"
+            android:gravity="center"
+            grid:layout_gravity="fill_horizontal"
+            />
+
+        <TextView
+            android:id="@+id/tv_low"
+            android:text="Low"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            grid:layout_columnWeight="1"
+            android:gravity="center"
+            grid:layout_gravity="fill_horizontal"
+            />
+
+        <TextView
+            android:id="@+id/tv_low_value"
+            android:text="Low"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            grid:layout_columnWeight="1"
+            android:gravity="center"
+            grid:layout_gravity="fill_horizontal"
+            />
+
+        <TextView
+            android:id="@+id/tv_percentage"
+            android:text="Percentage"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            grid:layout_columnWeight="1"
+            android:gravity="center"
+            grid:layout_gravity="fill_horizontal"
+            />
+
+        <TextView
+            android:id="@+id/tv_percentage_value"
+            android:text="Percentage"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            grid:layout_columnWeight="1"
+            android:gravity="center"
+            grid:layout_gravity="fill_horizontal"
+            />
+
+        <TextView
+            android:id="@+id/tv_absolute"
+            android:text="absolute"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            grid:layout_columnWeight="1"
+            android:gravity="center"
+            grid:layout_gravity="fill_horizontal"
+            />
+
+        <TextView
+            android:id="@+id/tv_absolute_value"
+            android:text="absolute"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            grid:layout_columnWeight="1"
+            android:gravity="center"
+            grid:layout_gravity="fill_horizontal"
+            />
+
+        <TextView
+            android:id="@+id/tv_volume"
+            android:text="volume"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            grid:layout_columnWeight="1"
+            android:gravity="center"
+            grid:layout_gravity="fill_horizontal"
+            />
+
+        <TextView
+            android:id="@+id/tv_volume_value"
+            android:text="volume"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            grid:layout_columnWeight="1"
+            android:gravity="center"
+            grid:layout_gravity="fill_horizontal"
+            />
+
+    </android.support.v7.widget.GridLayout>
+</android.support.constraint.ConstraintLayout>
