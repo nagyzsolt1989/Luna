@@ -31,15 +31,24 @@ import android.widget.ListView;
 
 import com.nagy.zsolt.luna.R;
 import com.nagy.zsolt.luna.data.Constants;
+import com.nagy.zsolt.luna.data.FetchDataListener;
+import com.nagy.zsolt.luna.data.GetAPIRequest;
+import com.nagy.zsolt.luna.data.RequestQueueService;
 import com.nagy.zsolt.luna.utils.SwipeDismissListViewTouchListener;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Optional;
+
+import static java.security.AccessController.getContext;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -65,6 +74,7 @@ public class MainActivity extends AppCompatActivity
     private List<String> mPortfolioValues;
     private ArrayAdapter<String> adapter;
     private ActionBarDrawerToggle toggle;
+    JSONObject coinsJsonArray;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -196,6 +206,8 @@ public class MainActivity extends AppCompatActivity
 
     private void showTransactionDialog() {
 
+        getCoinList();
+
         LayoutInflater inflater = LayoutInflater.from(this);
         View dialog_layout = inflater.inflate(R.layout.dialog_transaction, (ViewGroup) findViewById(R.id.dialog_linear_layout));
 
@@ -220,6 +232,91 @@ public class MainActivity extends AppCompatActivity
         });
         AlertDialog dialog = db.show();
     }
+
+    public void getCoinList() {
+
+        try {
+            //Create Instance of GETAPIRequest and call it's
+            //request() method
+            String url = "https://www.cryptocompare.com/api/data/coinlist/";
+            System.out.println(url);
+            GetAPIRequest getapiRequest = new GetAPIRequest();
+            getapiRequest.request(this, fetchGetResultListener, url);
+//            Toast.makeText(getContext(), "GET API called", Toast.LENGTH_SHORT).show();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    //Implementing interfaces of FetchDataListener for GET api request
+    FetchDataListener fetchGetResultListener = new FetchDataListener() {
+        @Override
+        public void onFetchComplete(JSONObject data) {
+            //Fetch Complete. Now stop progress bar  or loader
+            //you started in onFetchStart
+            RequestQueueService.cancelProgressDialog();
+            try {
+                //Check result sent by our GETAPIRequest class
+                if (data != null) {
+                    coinsJsonArray = data.getJSONObject("Data");
+                  System.out.println("Coinsjsonarray" + coinsJsonArray.names());
+//                    String[] valami = new String[coinsJsonArray.length()];
+//                    for(int i = 0; i<coinsJsonArray.names().length(); i++){
+//                        Log.v("afff", "key = " + coinsJsonArray.names().getString(i) );
+//                    }
+//                    Iterator<?> keys = coinsJsonArray.keys();
+//                    while(keys.hasNext()) {
+//                        System.out.println(keys.next());
+//                        String key = (String) keys.next();
+//                    }
+
+
+//                    for (int i = 0; i < coinsJsonArray.length(); i++) {
+//                        System.out.println(coinsJsonArray.g);
+//                    }
+//                    System.out.println("Coinsjsonarray" + coinsJsonArray.keys().toString());
+//                    moviePosterPath = new String[moviesJsonArray.length()];
+//                    for (int i = 0; i < moviesJsonArray.length(); i++) {
+//                        JSONObject obj = moviesJsonArray.getJSONObject(i);
+//                        moviePosterPath[i] = obj.optString(getString(R.string.posterPath));
+//                    }
+//                    MovieAdapter movieAdapter = new MovieAdapter(mContext, moviePosterPath);
+//                    gridView.setAdapter(movieAdapter);
+//                    if(restore != null){
+//                        gridView.onRestoreInstanceState(restore);
+//                    }
+//                    gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+//                        @Override
+//                        public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
+//                            launchDetailActivity(position);
+//                        }
+//                    });
+
+                } else {
+                    RequestQueueService.showAlert(getString(R.string.noDataAlert), MainActivity.this);
+                }
+            } catch (
+                    Exception e) {
+                RequestQueueService.showAlert(getString(R.string.exceptionAlert), MainActivity.this);
+                e.printStackTrace();
+            }
+
+        }
+
+        @Override
+        public void onFetchFailure(String msg) {
+            RequestQueueService.cancelProgressDialog();
+            //Show if any error message is there called from GETAPIRequest class
+            RequestQueueService.showAlert(msg, MainActivity.this);
+        }
+
+        @Override
+        public void onFetchStart() {
+            //Start showing progressbar or any loader you have
+            RequestQueueService.showProgressDialog(MainActivity.this);
+        }
+    };
 
     private void launchDetailActivity(int position) {
         Intent intent = new Intent(this, DetailActivity.class);

@@ -11,7 +11,8 @@
     <string name="title_section1">Section 1</string>
     <string name="title_section2">Section 2</string>
     <string name="title_section3">Section 3</string>
-
+    <string name="noDataAlert">Error! No data fetched</string>
+    <string name="exceptionAlert">Something went wrong</string>
     <string name="action_example">Example action</string>
     <string name="title_activity_settings">Settings</string>
 
