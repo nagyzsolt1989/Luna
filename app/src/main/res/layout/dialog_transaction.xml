@@ -31,10 +31,11 @@
         app:layout_constraintStart_toEndOf="@+id/rb_buy_transaction"
         app:layout_constraintTop_toTopOf="parent"/>
 
-    <EditText
-        android:id="@+id/currency"
+    <Spinner
+        android:id="@+id/currency_spinner"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:entries="@array/coins"
         android:layout_marginEnd="16dp"
         android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
@@ -55,18 +56,18 @@
         android:inputType="number"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/currency"/>
+        app:layout_constraintTop_toBottomOf="@+id/currency_spinner"/>
 
-    <EditText
+    <Button
         android:id="@+id/transaction_date"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        style="@android:style/Widget.EditText"
         android:layout_marginEnd="16dp"
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
         android:fontFamily="sans-serif"
         android:hint="Date"
-        android:inputType="date"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/amount"/>

@@ -1,5 +1,6 @@
 package com.nagy.zsolt.luna.ui;
 
+import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -8,6 +9,7 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
+import android.text.format.Time;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -25,9 +27,12 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.Spinner;
 
 import com.nagy.zsolt.luna.R;
 import com.nagy.zsolt.luna.data.Constants;
@@ -51,7 +56,7 @@ import butterknife.Optional;
 import static java.security.AccessController.getContext;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+        implements NavigationView.OnNavigationItemSelectedListener, DatePickerDialog.OnDateSetListener {
 
     @Nullable
     @BindView(R.id.lv_portfolio)
@@ -69,12 +74,16 @@ public class MainActivity extends AppCompatActivity
     @BindView(R.id.fab)
     FloatingActionButton fab;
     @Nullable
-    @BindView(R.id.currency)
-    EditText mTransactionCurrency;
+    @BindView(R.id.currency_spinner)
+    Spinner mCurrencySpinner;
+    @Nullable
+    @BindView(R.id.transaction_date)
+    Button mTransactionDate;
     private List<String> mPortfolioValues;
     private ArrayAdapter<String> adapter;
     private ActionBarDrawerToggle toggle;
     JSONObject coinsJsonArray;
+    private Object DatePicker;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -108,7 +117,7 @@ public class MainActivity extends AppCompatActivity
                 "Blackberry"));
 
         adapter = new ArrayAdapter<String>(this,
-                android.R.layout.simple_list_item_1, mPortfolioValues);
+                android.R.layout.simple_list_item_2, mPortfolioValues);
 
 
         // Assign adapter to ListView
@@ -215,17 +224,34 @@ public class MainActivity extends AppCompatActivity
         ButterKnife.bind(this, dialog_layout);
         db.setView(dialog_layout);
         db.setTitle("New Transaction");
-        db.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+
+        mTransactionDate.setShowSoftInputOnFocus(false);
+        mTransactionDate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                Time today = new Time(Time.getCurrentTimezone());
+
+                DatePickerDialog dialog = new DatePickerDialog(MainActivity.this, MainActivity.this, today.year, today.month, today.monthDay);
+                dialog.show();
+            }
+        });
+
+        db.setPositiveButton("OK", new DialogInterface.OnClickListener()
+
+        {
             public void onClick(DialogInterface dialog, int which) {
                 List<String> tempPortfolioValues = new ArrayList<String>();
                 tempPortfolioValues.addAll(mPortfolioValues);
-                tempPortfolioValues.add(mTransactionCurrency.getEditableText().toString());
+                tempPortfolioValues.add(mCurrencySpinner.getSelectedItem().toString());
                 mPortfolioValues.clear();
                 mPortfolioValues.addAll(tempPortfolioValues);
                 adapter.notifyDataSetChanged();
             }
         });
-        db.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+        db.setNegativeButton("Cancel", new DialogInterface.OnClickListener()
+
+        {
             public void onClick(DialogInterface dialog, int id) {
                 dialog.dismiss();
             }
@@ -260,7 +286,7 @@ public class MainActivity extends AppCompatActivity
                 //Check result sent by our GETAPIRequest class
                 if (data != null) {
                     coinsJsonArray = data.getJSONObject("Data");
-                  System.out.println("Coinsjsonarray" + coinsJsonArray.names());
+                    System.out.println("Coinsjsonarray" + coinsJsonArray.names());
 //                    String[] valami = new String[coinsJsonArray.length()];
 //                    for(int i = 0; i<coinsJsonArray.names().length(); i++){
 //                        Log.v("afff", "key = " + coinsJsonArray.names().getString(i) );
@@ -324,5 +350,10 @@ public class MainActivity extends AppCompatActivity
         intent.putExtra(Constants.EXTRA_CURRENCY, mPortfolioValues.get(position).toString());
         startActivity(intent);
         this.overridePendingTransition(R.anim.slide_from_right, R.anim.fade_out);
+    }
+
+    @Override
+    public void onDateSet(android.widget.DatePicker view, int year, int month, int dayOfMonth) {
+        mTransactionDate.setText(year + "." + month + "." + dayOfMonth);
     }
 }
