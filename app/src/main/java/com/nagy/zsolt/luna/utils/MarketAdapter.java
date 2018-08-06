@@ -13,16 +13,16 @@ import com.nagy.zsolt.luna.R;
 
 import java.util.ArrayList;
 
-public class PortfolioAdapter extends BaseAdapter {
+public class MarketAdapter extends BaseAdapter {
 
     private final Context mContext;
-    private final ArrayList<String> coin, amount, value;
+    private final ArrayList<String> coin, dailyChange, marketValue;
 
-    public PortfolioAdapter(Context context, ArrayList<String> coin, ArrayList<String> amount, ArrayList<String> value) {
+    public MarketAdapter(Context context, ArrayList<String> coin, ArrayList<String> dailyChange, ArrayList<String> marketValue) {
         this.mContext = context;
         this.coin = coin;
-        this.amount = amount;
-        this.value = value;
+        this.dailyChange = dailyChange;
+        this.marketValue = marketValue;
     }
 
     @Override
@@ -45,19 +45,19 @@ public class PortfolioAdapter extends BaseAdapter {
 
         if (convertView == null) {
             final LayoutInflater layoutInflater = LayoutInflater.from(mContext);
-            convertView = layoutInflater.inflate(R.layout.portfolio_list_item, null);
+            convertView = layoutInflater.inflate(R.layout.market_list_item, null);
         }
 
 //        final ImageView imageView = (ImageView) convertView.findViewById(R.id.thumbnail);
 //        Picasso.with(mContext).load("http://image.tmdb.org/t/p/w185/" + moviePosterPath[position]).into(imageView);
 //        imageView.setLayoutParams(new FrameLayout.LayoutParams(posterlWidth, posterHeight));
-        TextView tt1 = (TextView) convertView.findViewById(R.id.coin);
-        TextView tt2 = (TextView) convertView.findViewById(R.id.amount);
-        TextView tt3 = (TextView) convertView.findViewById(R.id.value);
+        TextView tt1 = (TextView) convertView.findViewById(R.id.market_coin);
+        TextView tt2 = (TextView) convertView.findViewById(R.id.market_daily_change);
+        TextView tt3 = (TextView) convertView.findViewById(R.id.market_value);
 
         tt1.setText(coin.get(position));
-        tt2.setText(amount.get(position));
-        tt3.setText(value.get(position));
+        tt2.setText(dailyChange.get(position));
+        tt3.setText(marketValue.get(position));
 
         return convertView;
     }

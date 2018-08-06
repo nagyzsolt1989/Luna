@@ -21,11 +21,12 @@
     </LinearLayout>
 
     <TextView
-        android:id="@+id/coin"
+        android:id="@+id/market_coin"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignTop="@+id/thumbnail"
         android:layout_toRightOf="@+id/thumbnail"
+        android:layout_marginTop="14dp"
         android:text="BTC"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1"
         android:textSize="20sp"
@@ -33,24 +34,26 @@
         />
 
     <TextView
-        android:id="@+id/amount"
-        android:layout_width="fill_parent"
+        android:id="@+id/market_daily_change"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/coin"
-        android:layout_marginTop="1dip"
-        android:layout_toRightOf="@+id/thumbnail"
+        android:layout_marginTop="3dp"
+        android:layout_alignParentRight="true"
+        android:layout_alignTop="@id/coin"
+        android:layout_marginRight="28dp"
+        android:gravity="right"
         android:text="0.35"
         android:textSize="16sp"/>
 
     <TextView
-        android:id="@+id/value"
+        android:id="@+id/market_value"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:layout_alignTop="@id/coin"
         android:layout_marginRight="12dp"
-        android:layout_marginTop="10dp"
         android:gravity="right"
+        android:layout_below="@id/market_daily_change"
         android:text="1000 $"
         android:textSize="20sp"/>
 

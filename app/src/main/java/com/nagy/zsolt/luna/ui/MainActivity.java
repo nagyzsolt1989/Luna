@@ -1,18 +1,15 @@
 package com.nagy.zsolt.luna.ui;
 
 import android.app.DatePickerDialog;
-import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
+import android.text.format.DateFormat;
 import android.text.format.Time;
-import android.util.Log;
 import android.view.Gravity;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -24,13 +21,10 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.ViewGroup;
-import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.DatePicker;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Spinner;
 
@@ -39,21 +33,18 @@ import com.nagy.zsolt.luna.data.Constants;
 import com.nagy.zsolt.luna.data.FetchDataListener;
 import com.nagy.zsolt.luna.data.GetAPIRequest;
 import com.nagy.zsolt.luna.data.RequestQueueService;
+import com.nagy.zsolt.luna.utils.PortfolioAdapter;
 import com.nagy.zsolt.luna.utils.SwipeDismissListViewTouchListener;
 
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
+import java.util.Calendar;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import butterknife.Optional;
-
-import static java.security.AccessController.getContext;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, DatePickerDialog.OnDateSetListener {
@@ -77,13 +68,15 @@ public class MainActivity extends AppCompatActivity
     @BindView(R.id.currency_spinner)
     Spinner mCurrencySpinner;
     @Nullable
+    @BindView(R.id.amount)
+    EditText mAmount;
+    @Nullable
     @BindView(R.id.transaction_date)
     Button mTransactionDate;
-    private List<String> mPortfolioValues;
-    private ArrayAdapter<String> adapter;
+    private PortfolioAdapter mPortfolioAdapter;
     private ActionBarDrawerToggle toggle;
     JSONObject coinsJsonArray;
-    private Object DatePicker;
+    ArrayList<String> coin, amount, values;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -113,15 +106,25 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
-        mPortfolioValues = new ArrayList<String>(Arrays.asList("Android", "iPhone", "WindowsMobile",
-                "Blackberry"));
+        coin = new ArrayList<>();
+        amount = new ArrayList<>();
+        values = new ArrayList<>();
 
-        adapter = new ArrayAdapter<String>(this,
-                android.R.layout.simple_list_item_2, mPortfolioValues);
+        coin.add("BTC");
+        coin.add("ETH");
+        coin.add("EOS");
+        amount.add("0.35");
+        amount.add("11");
+        amount.add("27");
+        values.add("1000 $");
+        values.add("1600 $");
+        values.add("2000 $");
+
+        mPortfolioAdapter = new PortfolioAdapter(this, coin, amount, values);
 
 
         // Assign adapter to ListView
-        mPortfolioListView.setAdapter(adapter);
+        mPortfolioListView.setAdapter(mPortfolioAdapter);
 
         SwipeDismissListViewTouchListener touchListener =
                 new SwipeDismissListViewTouchListener(
@@ -136,8 +139,8 @@ public class MainActivity extends AppCompatActivity
                             public void onDismiss(ListView listView, int[] reverseSortedPositions) {
                                 for (int position : reverseSortedPositions) {
 
-                                    mPortfolioValues.remove(position);
-                                    adapter.notifyDataSetChanged();
+                                    coin.remove(position);
+                                    mPortfolioAdapter.notifyDataSetChanged();
 
                                 }
 
@@ -178,6 +181,8 @@ public class MainActivity extends AppCompatActivity
 
         if (id == R.id.action_drawer) {
 
+            mDrawer = findViewById(R.id.drawer_layout);
+
             if (!mDrawer.isDrawerOpen(Gravity.LEFT)) {
                 mDrawer.openDrawer(Gravity.LEFT);
                 toggle.syncState();
@@ -198,6 +203,7 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_gallery) {
+            mDrawer.closeDrawer(Gravity.LEFT);
 
         } else if (id == R.id.nav_slideshow) {
             Intent intent = new Intent(this, MarketActivity.class);
@@ -230,9 +236,10 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onClick(View v) {
 
-                Time today = new Time(Time.getCurrentTimezone());
+//                Time today = new Time(Time.getCurrentTimezone());
+                Calendar calendar = Calendar.getInstance();
 
-                DatePickerDialog dialog = new DatePickerDialog(MainActivity.this, MainActivity.this, today.year, today.month, today.monthDay);
+                DatePickerDialog dialog = new DatePickerDialog(MainActivity.this, MainActivity.this, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH));
                 dialog.show();
             }
         });
@@ -241,12 +248,12 @@ public class MainActivity extends AppCompatActivity
 
         {
             public void onClick(DialogInterface dialog, int which) {
-                List<String> tempPortfolioValues = new ArrayList<String>();
-                tempPortfolioValues.addAll(mPortfolioValues);
-                tempPortfolioValues.add(mCurrencySpinner.getSelectedItem().toString());
-                mPortfolioValues.clear();
-                mPortfolioValues.addAll(tempPortfolioValues);
-                adapter.notifyDataSetChanged();
+
+                coin.add(mCurrencySpinner.getSelectedItem().toString());
+                amount.add(mAmount.getText().toString());
+                values.add("1000");
+                mPortfolioAdapter.notifyDataSetChanged();
+
             }
         });
         db.setNegativeButton("Cancel", new DialogInterface.OnClickListener()
@@ -287,37 +294,6 @@ public class MainActivity extends AppCompatActivity
                 if (data != null) {
                     coinsJsonArray = data.getJSONObject("Data");
                     System.out.println("Coinsjsonarray" + coinsJsonArray.names());
-//                    String[] valami = new String[coinsJsonArray.length()];
-//                    for(int i = 0; i<coinsJsonArray.names().length(); i++){
-//                        Log.v("afff", "key = " + coinsJsonArray.names().getString(i) );
-//                    }
-//                    Iterator<?> keys = coinsJsonArray.keys();
-//                    while(keys.hasNext()) {
-//                        System.out.println(keys.next());
-//                        String key = (String) keys.next();
-//                    }
-
-
-//                    for (int i = 0; i < coinsJsonArray.length(); i++) {
-//                        System.out.println(coinsJsonArray.g);
-//                    }
-//                    System.out.println("Coinsjsonarray" + coinsJsonArray.keys().toString());
-//                    moviePosterPath = new String[moviesJsonArray.length()];
-//                    for (int i = 0; i < moviesJsonArray.length(); i++) {
-//                        JSONObject obj = moviesJsonArray.getJSONObject(i);
-//                        moviePosterPath[i] = obj.optString(getString(R.string.posterPath));
-//                    }
-//                    MovieAdapter movieAdapter = new MovieAdapter(mContext, moviePosterPath);
-//                    gridView.setAdapter(movieAdapter);
-//                    if(restore != null){
-//                        gridView.onRestoreInstanceState(restore);
-//                    }
-//                    gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-//                        @Override
-//                        public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
-//                            launchDetailActivity(position);
-//                        }
-//                    });
 
                 } else {
                     RequestQueueService.showAlert(getString(R.string.noDataAlert), MainActivity.this);
@@ -347,13 +323,15 @@ public class MainActivity extends AppCompatActivity
     private void launchDetailActivity(int position) {
         Intent intent = new Intent(this, DetailActivity.class);
         intent.putExtra(Constants.EXTRA_POSITION, position);
-        intent.putExtra(Constants.EXTRA_CURRENCY, mPortfolioValues.get(position).toString());
+        intent.putExtra(Constants.EXTRA_CURRENCY, coin.get(position).toString());
         startActivity(intent);
         this.overridePendingTransition(R.anim.slide_from_right, R.anim.fade_out);
     }
 
     @Override
     public void onDateSet(android.widget.DatePicker view, int year, int month, int dayOfMonth) {
+
+        month++;
         mTransactionDate.setText(year + "." + month + "." + dayOfMonth);
     }
 }
