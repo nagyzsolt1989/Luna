@@ -2,16 +2,18 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
+                xmlns:app="http://schemas.android.com/apk/res-auto"
                 android:orientation="horizontal"
-                android:padding="5dip" >
+                android:padding="5dip">
 
     <!--  ListRow Left sied Thumbnail image -->
-    <LinearLayout android:id="@+id/thumbnail"
-                  android:layout_width="wrap_content"
-                  android:layout_height="wrap_content"
-                  android:padding="3dip"
-                  android:layout_alignParentLeft="true"
-                  android:layout_marginRight="5dip">
+    <LinearLayout
+        android:id="@+id/thumbnail"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_marginRight="5dip"
+        android:padding="3dip">
 
         <ImageView
             android:id="@+id/coin_image"
@@ -25,36 +27,43 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignTop="@+id/thumbnail"
-        android:layout_toRightOf="@+id/thumbnail"
         android:layout_marginTop="14dp"
+        android:layout_toRightOf="@+id/thumbnail"
         android:text="BTC"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1"
         android:textSize="20sp"
         android:textStyle="bold"
         />
 
-    <TextView
-        android:id="@+id/market_daily_change"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="3dp"
-        android:layout_alignParentRight="true"
-        android:layout_alignTop="@id/coin"
-        android:layout_marginRight="28dp"
-        android:gravity="right"
-        android:text="0.35"
-        android:textSize="16sp"/>
-
-    <TextView
-        android:id="@+id/market_value"
-        android:layout_width="wrap_content"
+    <android.support.constraint.ConstraintLayout
+        android:layout_width="75dp"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
-        android:layout_alignTop="@id/coin"
-        android:layout_marginRight="12dp"
-        android:gravity="right"
-        android:layout_below="@id/market_daily_change"
-        android:text="1000 $"
-        android:textSize="20sp"/>
+        android:layout_marginRight="6dp"
+        android:layout_marginTop="3dp">
 
+        <TextView
+            android:id="@+id/market_daily_change"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="0.35"
+            android:textSize="16sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"/>
+
+        <TextView
+            android:id="@+id/market_value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="1000 $"
+            android:textSize="20sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/market_daily_change"/>
+
+    </android.support.constraint.ConstraintLayout>
 </RelativeLayout>

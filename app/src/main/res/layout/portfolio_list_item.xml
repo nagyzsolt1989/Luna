@@ -2,16 +2,18 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
+                xmlns:app="http://schemas.android.com/apk/res-auto"
                 android:orientation="horizontal"
-                android:padding="5dip" >
+                android:padding="5dip">
 
     <!--  ListRow Left sied Thumbnail image -->
-    <LinearLayout android:id="@+id/thumbnail"
-                  android:layout_width="wrap_content"
-                  android:layout_height="wrap_content"
-                  android:padding="3dip"
-                  android:layout_alignParentLeft="true"
-                  android:layout_marginRight="5dip">
+    <LinearLayout
+        android:id="@+id/thumbnail"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_marginRight="5dip"
+        android:padding="3dip">
 
         <ImageView
             android:id="@+id/coin_image"
@@ -42,16 +44,33 @@
         android:text="0.35"
         android:textSize="16sp"/>
 
-    <TextView
-        android:id="@+id/value"
+    <android.support.constraint.ConstraintLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
-        android:layout_alignTop="@id/coin"
-        android:layout_marginRight="12dp"
-        android:layout_marginTop="10dp"
-        android:gravity="right"
-        android:text="1000 $"
-        android:textSize="20sp"/>
+        android:layout_marginRight="6dp">
+
+        <TextView
+            android:id="@+id/value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_marginTop="8dp"
+            android:text="1000"
+            android:textSize="20sp"
+            app:layout_constraintTop_toTopOf="parent"/>
+
+        <TextView
+            android:id="@+id/currency_symbol"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_marginTop="8dp"
+            android:text=" $"
+            android:textSize="20sp"
+            app:layout_constraintStart_toEndOf="@id/value"
+            app:layout_constraintTop_toTopOf="parent"/>
+
+    </android.support.constraint.ConstraintLayout>
 
 </RelativeLayout>

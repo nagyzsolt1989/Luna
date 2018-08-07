@@ -27,6 +27,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Spinner;
+import android.widget.TextView;
 
 import com.nagy.zsolt.luna.R;
 import com.nagy.zsolt.luna.data.Constants;
@@ -71,12 +72,16 @@ public class MainActivity extends AppCompatActivity
     @BindView(R.id.amount)
     EditText mAmount;
     @Nullable
+    @BindView(R.id.tv_portfolio_value)
+    TextView mSumPortfolioTV;
+    @Nullable
     @BindView(R.id.transaction_date)
     Button mTransactionDate;
     private PortfolioAdapter mPortfolioAdapter;
     private ActionBarDrawerToggle toggle;
     JSONObject coinsJsonArray;
     ArrayList<String> coin, amount, values;
+    float mSumPortfolio;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -116,9 +121,11 @@ public class MainActivity extends AppCompatActivity
         amount.add("0.35");
         amount.add("11");
         amount.add("27");
-        values.add("1000 $");
-        values.add("1600 $");
-        values.add("2000 $");
+        values.add("1000");
+        values.add("1600");
+        values.add("2000");
+
+        calculateSumPortfolio();
 
         mPortfolioAdapter = new PortfolioAdapter(this, coin, amount, values);
 
@@ -140,7 +147,9 @@ public class MainActivity extends AppCompatActivity
                                 for (int position : reverseSortedPositions) {
 
                                     coin.remove(position);
+                                    values.remove(position);
                                     mPortfolioAdapter.notifyDataSetChanged();
+                                    calculateSumPortfolio();
 
                                 }
 
@@ -153,6 +162,7 @@ public class MainActivity extends AppCompatActivity
                 launchDetailActivity(position);
             }
         });
+
     }
 
     @Override
@@ -253,6 +263,7 @@ public class MainActivity extends AppCompatActivity
                 amount.add(mAmount.getText().toString());
                 values.add("1000");
                 mPortfolioAdapter.notifyDataSetChanged();
+                calculateSumPortfolio();
 
             }
         });
@@ -326,6 +337,14 @@ public class MainActivity extends AppCompatActivity
         intent.putExtra(Constants.EXTRA_CURRENCY, coin.get(position).toString());
         startActivity(intent);
         this.overridePendingTransition(R.anim.slide_from_right, R.anim.fade_out);
+    }
+
+    private void calculateSumPortfolio(){
+        mSumPortfolio = 0.0f;
+        for(int i = 0; i < values.size(); i++) {
+            mSumPortfolio += Float.parseFloat(values.get(i));
+        }
+        mSumPortfolioTV.setText(Float.toString(mSumPortfolio));
     }
 
     @Override

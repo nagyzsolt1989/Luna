@@ -1,6 +1,7 @@
 package com.nagy.zsolt.luna.utils;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -58,6 +59,13 @@ public class MarketAdapter extends BaseAdapter {
         tt1.setText(coin.get(position));
         tt2.setText(dailyChange.get(position));
         tt3.setText(marketValue.get(position));
+
+        //Colorize Market Daily Change
+        if(Float.parseFloat(dailyChange.get(position))> 0 ){
+            tt2.setTextColor(Color.GREEN);
+        }else{
+            tt2.setTextColor(Color.RED);
+        }
 
         return convertView;
     }
