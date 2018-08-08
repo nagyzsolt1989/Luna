@@ -81,7 +81,7 @@ public class MainActivity extends AppCompatActivity
     private ActionBarDrawerToggle toggle;
     JSONObject coinsJsonArray;
     ArrayList<String> coin, amount, values;
-    float mSumPortfolio;
+    double mSumPortfolio;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -115,15 +115,15 @@ public class MainActivity extends AppCompatActivity
         amount = new ArrayList<>();
         values = new ArrayList<>();
 
-        coin.add("BTC");
-        coin.add("ETH");
-        coin.add("EOS");
-        amount.add("0.35");
-        amount.add("11");
-        amount.add("27");
-        values.add("1000");
-        values.add("1600");
-        values.add("2000");
+//        coin.add("BTC");
+//        coin.add("ETH");
+//        coin.add("EOS");
+//        amount.add("0.35");
+//        amount.add("11");
+//        amount.add("27");
+//        values.add("1000");
+//        values.add("1600");
+//        values.add("2000");
 
         calculateSumPortfolio();
 
@@ -231,8 +231,6 @@ public class MainActivity extends AppCompatActivity
 
     private void showTransactionDialog() {
 
-        getCoinList();
-
         LayoutInflater inflater = LayoutInflater.from(this);
         View dialog_layout = inflater.inflate(R.layout.dialog_transaction, (ViewGroup) findViewById(R.id.dialog_linear_layout));
 
@@ -261,9 +259,7 @@ public class MainActivity extends AppCompatActivity
 
                 coin.add(mCurrencySpinner.getSelectedItem().toString());
                 amount.add(mAmount.getText().toString());
-                values.add("1000");
-                mPortfolioAdapter.notifyDataSetChanged();
-                calculateSumPortfolio();
+                getCoinPrice(mCurrencySpinner.getSelectedItem().toString());
 
             }
         });
@@ -277,12 +273,12 @@ public class MainActivity extends AppCompatActivity
         AlertDialog dialog = db.show();
     }
 
-    public void getCoinList() {
+    public void getCoinPrice(String coin) {
 
         try {
             //Create Instance of GETAPIRequest and call it's
             //request() method
-            String url = "https://www.cryptocompare.com/api/data/coinlist/";
+            String url = "https://min-api.cryptocompare.com/data/price?fsym=" + coin + "&tsyms=BTC,USD,EUR";
             System.out.println(url);
             GetAPIRequest getapiRequest = new GetAPIRequest();
             getapiRequest.request(this, fetchGetResultListener, url);
@@ -303,9 +299,13 @@ public class MainActivity extends AppCompatActivity
             try {
                 //Check result sent by our GETAPIRequest class
                 if (data != null) {
-                    coinsJsonArray = data.getJSONObject("Data");
-                    System.out.println("Coinsjsonarray" + coinsJsonArray.names());
-
+                    double amount = Double.parseDouble(mAmount.getText().toString());
+                    double price = data.getDouble("USD");
+                    double value = amount * price;
+                    System.out.println(Double.toString(value));
+                    values.add(Double.toString(value));
+                    mPortfolioAdapter.notifyDataSetChanged();
+                    calculateSumPortfolio();
                 } else {
                     RequestQueueService.showAlert(getString(R.string.noDataAlert), MainActivity.this);
                 }
@@ -340,11 +340,15 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void calculateSumPortfolio(){
-        mSumPortfolio = 0.0f;
+
+        mSumPortfolioTV = findViewById(R.id.tv_portfolio_value);
+
+        mSumPortfolio = 0.0;
         for(int i = 0; i < values.size(); i++) {
-            mSumPortfolio += Float.parseFloat(values.get(i));
+            mSumPortfolio += Double.parseDouble(values.get(i));
         }
-        mSumPortfolioTV.setText(Float.toString(mSumPortfolio));
+        System.out.println("mSumPortfolio: " + mSumPortfolio);
+        mSumPortfolioTV.setText(Double.toString(mSumPortfolio));
     }
 
     @Override

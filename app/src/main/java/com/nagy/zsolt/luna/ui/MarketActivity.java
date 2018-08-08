@@ -19,7 +19,13 @@ import android.widget.ListView;
 
 import com.nagy.zsolt.luna.R;
 import com.nagy.zsolt.luna.data.Constants;
+import com.nagy.zsolt.luna.data.FetchDataListener;
+import com.nagy.zsolt.luna.data.GetAPIRequest;
+import com.nagy.zsolt.luna.data.RequestQueueService;
 import com.nagy.zsolt.luna.utils.MarketAdapter;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -42,6 +48,7 @@ public class MarketActivity extends AppCompatActivity implements NavigationView.
     private ActionBarDrawerToggle toggle;
     private ArrayAdapter<String> adapter;
     private MarketAdapter mMarketAdapter;
+    private JSONObject marketPrices;
     ArrayList<String> coin, mDailyChange, mMarketValue;
 
     @Override
@@ -67,63 +74,8 @@ public class MarketActivity extends AppCompatActivity implements NavigationView.
         mDailyChange = new ArrayList<>();
         mMarketValue = new ArrayList<>();
 
-        coin.add("BTC");
-        coin.add("ETH");
-        coin.add("XRP");
-        coin.add("BCH");
-        coin.add("EOS");
-        coin.add("XLM");
-        coin.add("LTC");
-        coin.add("ADA");
-        coin.add("USDT");
-        coin.add("MIOTA");
-        coin.add("ETC");
-        coin.add("TRX");
-        coin.add("XMR");
-        coin.add("NEO");
-        coin.add("DASH");
-        mDailyChange.add("0.35");
-        mDailyChange.add("-5.6");
-        mDailyChange.add("7");
-        mDailyChange.add("0.35");
-        mDailyChange.add("-5.6");
-        mDailyChange.add("7");
-        mDailyChange.add("0.35");
-        mDailyChange.add("-5.6");
-        mDailyChange.add("7");
-        mDailyChange.add("0.35");
-        mDailyChange.add("-5.6");
-        mDailyChange.add("7");
-        mDailyChange.add("0.35");
-        mDailyChange.add("-5.6");
-        mDailyChange.add("7");
-        mMarketValue.add("1210 $");
-        mMarketValue.add("325 $");
-        mMarketValue.add("7 $");
-        mMarketValue.add("1210 $");
-        mMarketValue.add("325 $");
-        mMarketValue.add("7 $");
-        mMarketValue.add("1210 $");
-        mMarketValue.add("325 $");
-        mMarketValue.add("7 $");
-        mMarketValue.add("1210 $");
-        mMarketValue.add("325 $");
-        mMarketValue.add("7 $");
-        mMarketValue.add("1210 $");
-        mMarketValue.add("325 $");
-        mMarketValue.add("7 $");
+        getMarketPrices();
 
-        mMarketAdapter = new MarketAdapter(this, coin, mDailyChange, mMarketValue);
-
-        // Assign adapter to ListView
-        mMarketListView.setAdapter(mMarketAdapter);
-
-        mMarketListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
-                launchDetailActivity(position);
-            }
-        });
     }
 
     private void launchDetailActivity(int position) {
@@ -187,4 +139,84 @@ public class MarketActivity extends AppCompatActivity implements NavigationView.
 
         return true;
     }
+
+    public void getMarketPrices() {
+
+        try {
+            //Create Instance of GETAPIRequest and call it's
+            //request() method
+            String url = "https://min-api.cryptocompare.com/data/pricemultifull?fsyms=BTC,ETH,XRP,BCH,EOS,XLM,LTC,ADA,USDT,MIOTA,ETC,TRX,XMR,NEO,DASH&tsyms=USD,EUR";
+            System.out.println(url);
+            GetAPIRequest getapiRequest = new GetAPIRequest();
+            getapiRequest.request(this, fetchGetResultListener, url);
+//            Toast.makeText(getContext(), "GET API called", Toast.LENGTH_SHORT).show();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    //Implementing interfaces of FetchDataListener for GET api request
+    FetchDataListener fetchGetResultListener = new FetchDataListener() {
+        @Override
+        public void onFetchComplete(JSONObject data) {
+            //Fetch Complete. Now stop progress bar  or loader
+            //you started in onFetchStart
+            RequestQueueService.cancelProgressDialog();
+            try {
+                //Check result sent by our GETAPIRequest class
+                if (data != null) {
+                    System.out.println(data);
+                    marketPrices = data.getJSONObject("RAW");
+                    JSONArray arr = data.getJSONArray("RAW");
+                    for (int i = 0; i < arr.length(); i++) {
+                        JSONObject o = arr.getJSONObject(i);
+                        System.out.println(o.getJSONObject("USD"));
+                        System.out.println(o.getJSONObject("USD").getString("CHANGEPCTDAY"));
+                        mDailyChange.add(o.getJSONObject("USD").getString("CHANGEPCTDAY"));
+                        mMarketValue.add(o.getJSONObject("USD").getString("CHANGEDAY"));
+
+                    }
+
+                    coin.add("BTC");
+                    coin.add("ETH");
+                    coin.add("XRP");
+                    coin.add("BCH");
+                    coin.add("EOS");
+                    coin.add("XLM");
+                    coin.add("LTC");
+                    coin.add("ADA");
+                    coin.add("USDT");
+                    coin.add("MIOTA");
+                    coin.add("ETC");
+                    coin.add("TRX");
+                    coin.add("XMR");
+                    coin.add("NEO");
+                    coin.add("DASH");
+
+
+                } else {
+                    RequestQueueService.showAlert(getString(R.string.noDataAlert), MarketActivity.this);
+                }
+            } catch (
+                    Exception e) {
+                RequestQueueService.showAlert(getString(R.string.exceptionAlert), MarketActivity.this);
+                e.printStackTrace();
+            }
+
+        }
+
+        @Override
+        public void onFetchFailure(String msg) {
+            RequestQueueService.cancelProgressDialog();
+            //Show if any error message is there called from GETAPIRequest class
+            RequestQueueService.showAlert(msg, MarketActivity.this);
+        }
+
+        @Override
+        public void onFetchStart() {
+            //Start showing progressbar or any loader you have
+            RequestQueueService.showProgressDialog(MarketActivity.this);
+        }
+    };
 }
