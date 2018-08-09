@@ -1,5 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <array name="ic_coins">
+    <item>/media/19633/btc.png</item>
+    <item>/media/20646/eth_logo.png</item>
+    <item>/media/19782/litecoin-logo.png</item>
+    <item>/media/33842920/dash.png</item>
+    <item>/media/19969/xmr.png</item>
+    <item>/media/20627/nxt.png</item>
+    <item>/media/33752295/etc_new.png</item>
+    <item>/media/19684/doge.png</item>
+    <item>/media/351360/zec.png</item>
+    <item>/media/20705/bts.png</item>
+    <item>/media/12318264/7638-nty_400x400.jpg</item>
+    <item>/media/19630/btcd_1.png</item>
+    <item>/media/19864/peercoin-logo.png</item>
+    <item>/media/20022/craig.png</item>
+    <item>/media/351060/xbs_1.png</item>
+    <item>/media/20076/xpy_1.png</item>
+    <item>/media/20393/prc.png</item>
+    <item>/media/19975/ybc.png</item>
+    <item>/media/20247/dank.png</item>
+    </array>
     <array name="coins">
         <item>BTC</item>
         <item>ETH</item>

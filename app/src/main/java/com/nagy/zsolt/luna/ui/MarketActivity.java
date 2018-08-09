@@ -27,14 +27,18 @@ import com.nagy.zsolt.luna.utils.MarketAdapter;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class MarketActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
+import static java.lang.Math.round;
+
+public class MarketActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     @BindView(R.id.lv_market)
     ListView mMarketListView;
@@ -75,6 +79,22 @@ public class MarketActivity extends AppCompatActivity implements NavigationView.
         mMarketValue = new ArrayList<>();
 
         getMarketPrices();
+
+        coin.add("BTC");
+        coin.add("ETH");
+        coin.add("XRP");
+        coin.add("BCH");
+        coin.add("EOS");
+        coin.add("XLM");
+        coin.add("LTC");
+        coin.add("ADA");
+        coin.add("USDT");
+        coin.add("BNB");
+        coin.add("ETC");
+        coin.add("TRX");
+        coin.add("XMR");
+        coin.add("NEO");
+        coin.add("DASH");
 
     }
 
@@ -145,7 +165,7 @@ public class MarketActivity extends AppCompatActivity implements NavigationView.
         try {
             //Create Instance of GETAPIRequest and call it's
             //request() method
-            String url = "https://min-api.cryptocompare.com/data/pricemultifull?fsyms=BTC,ETH,XRP,BCH,EOS,XLM,LTC,ADA,USDT,MIOTA,ETC,TRX,XMR,NEO,DASH&tsyms=USD,EUR";
+            String url = "https://min-api.cryptocompare.com/data/pricemultifull?fsyms=BTC,ETH,XRP,BCH,EOS,XLM,LTC,ADA,USDT,BNB,ETC,TRX,XMR,NEO,DASH&tsyms=USD,EUR";
             System.out.println(url);
             GetAPIRequest getapiRequest = new GetAPIRequest();
             getapiRequest.request(this, fetchGetResultListener, url);
@@ -166,33 +186,35 @@ public class MarketActivity extends AppCompatActivity implements NavigationView.
             try {
                 //Check result sent by our GETAPIRequest class
                 if (data != null) {
-                    System.out.println(data);
+//                    System.out.println(data);
                     marketPrices = data.getJSONObject("RAW");
-                    JSONArray arr = data.getJSONArray("RAW");
-                    for (int i = 0; i < arr.length(); i++) {
-                        JSONObject o = arr.getJSONObject(i);
-                        System.out.println(o.getJSONObject("USD"));
-                        System.out.println(o.getJSONObject("USD").getString("CHANGEPCTDAY"));
-                        mDailyChange.add(o.getJSONObject("USD").getString("CHANGEPCTDAY"));
-                        mMarketValue.add(o.getJSONObject("USD").getString("CHANGEDAY"));
 
+                    Iterator<String> keysItr = marketPrices.keys();
+
+                    //Iterating over the JSON and save values
+                    while (keysItr.hasNext()) {
+                        String key = keysItr.next();
+                        JSONObject coinObject = marketPrices.getJSONObject(key);
+
+                        //Get the PRICE and CHANGEPCTDAY value and format it to 2 decimals
+                        DecimalFormat df = new DecimalFormat("#.##");
+                        Double tempMarketValue = (Double.valueOf(df.format(coinObject.getJSONObject("USD").getDouble("PRICE"))));
+                        Double tempDailyPriceChange = (Double.valueOf(df.format(coinObject.getJSONObject("USD").getDouble("CHANGEPCT24HOUR"))));
+                        mMarketValue.add(String.valueOf(tempMarketValue));
+                        mDailyChange.add(String.valueOf(tempDailyPriceChange));
                     }
 
-                    coin.add("BTC");
-                    coin.add("ETH");
-                    coin.add("XRP");
-                    coin.add("BCH");
-                    coin.add("EOS");
-                    coin.add("XLM");
-                    coin.add("LTC");
-                    coin.add("ADA");
-                    coin.add("USDT");
-                    coin.add("MIOTA");
-                    coin.add("ETC");
-                    coin.add("TRX");
-                    coin.add("XMR");
-                    coin.add("NEO");
-                    coin.add("DASH");
+                    mMarketAdapter = new MarketAdapter(MarketActivity.this, coin, getResources().getStringArray(R.array.ic_coins), mDailyChange, mMarketValue);
+
+                    // Assign adapter to ListView
+                    mMarketListView.setAdapter(mMarketAdapter);
+
+                    mMarketListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                        @Override
+                        public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
+                            launchDetailActivity(position);
+                        }
+                    });
 
 
                 } else {

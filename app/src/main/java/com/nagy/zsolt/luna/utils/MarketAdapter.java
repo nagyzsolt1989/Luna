@@ -7,10 +7,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.nagy.zsolt.luna.R;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
@@ -18,10 +20,12 @@ public class MarketAdapter extends BaseAdapter {
 
     private final Context mContext;
     private final ArrayList<String> coin, dailyChange, marketValue;
+    private final String[] coinImgPath;
 
-    public MarketAdapter(Context context, ArrayList<String> coin, ArrayList<String> dailyChange, ArrayList<String> marketValue) {
+    public MarketAdapter(Context context, ArrayList<String> coin, String[] coinImgPath, ArrayList<String> dailyChange, ArrayList<String> marketValue) {
         this.mContext = context;
         this.coin = coin;
+        this.coinImgPath = coinImgPath;
         this.dailyChange = dailyChange;
         this.marketValue = marketValue;
     }
@@ -49,9 +53,12 @@ public class MarketAdapter extends BaseAdapter {
             convertView = layoutInflater.inflate(R.layout.market_list_item, null);
         }
 
-//        final ImageView imageView = (ImageView) convertView.findViewById(R.id.thumbnail);
-//        Picasso.with(mContext).load("http://image.tmdb.org/t/p/w185/" + moviePosterPath[position]).into(imageView);
-//        imageView.setLayoutParams(new FrameLayout.LayoutParams(posterlWidth, posterHeight));
+        int coinImgWidth = 120;
+        int coinImgHeight = 120;
+
+        final ImageView imageView = (ImageView) convertView.findViewById(R.id.coin_image);
+        Picasso.get().load("https://www.cryptocompare.com/" + coinImgPath[position]).into(imageView);
+        imageView.setLayoutParams(new FrameLayout.LayoutParams(coinImgWidth, coinImgHeight));
         TextView tt1 = (TextView) convertView.findViewById(R.id.market_coin);
         TextView tt2 = (TextView) convertView.findViewById(R.id.market_daily_change);
         TextView tt3 = (TextView) convertView.findViewById(R.id.market_value);
