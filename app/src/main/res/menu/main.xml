@@ -3,8 +3,13 @@
       xmlns:tools="http://schemas.android.com/tools"
       tools:context="com.nagy.zsolt.luna.ui.MainActivity">
     <item
+        android:id="@+id/action_add"
+        android:title="Drawer"
+        android:icon="@drawable/ic_action_add"
+        app:showAsAction="always" />
+    <item
         android:id="@+id/action_drawer"
         android:title="Drawer"
-        android:icon="@drawable/ic_drawer"
+        android:icon="@drawable/ic_menu"
         app:showAsAction="always" />
 </menu>

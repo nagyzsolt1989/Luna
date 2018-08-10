@@ -36,33 +36,29 @@
         android:textStyle="bold"/>
 
     <android.support.constraint.ConstraintLayout
-        android:layout_width="75dp"
+        android:layout_width="100dp"
         android:layout_height="wrap_content"
+        android:layout_marginRight="16dp"
         android:layout_alignParentRight="true"
-        android:layout_marginRight="6dp"
         android:layout_marginTop="3dp">
 
         <TextView
             android:id="@+id/market_daily_change"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:gravity="center"
             android:text="0.35"
             android:textSize="16sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toStartOf="parent"/>
+            android:gravity="end"
+            app:layout_constraintEnd_toEndOf="parent"/>
 
         <TextView
             android:id="@+id/market_value"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:gravity="center"
-            android:text="1000 $"
+            android:text="1000.01"
             android:textSize="20sp"
+            android:gravity="end"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/market_daily_change"/>
 
     </android.support.constraint.ConstraintLayout>

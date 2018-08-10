@@ -63,9 +63,6 @@ public class MainActivity extends AppCompatActivity
     @BindView(R.id.nav_view)
     NavigationView navigationView;
     @Nullable
-    @BindView(R.id.fab)
-    FloatingActionButton fab;
-    @Nullable
     @BindView(R.id.currency_spinner)
     Spinner mCurrencySpinner;
     @Nullable
@@ -102,28 +99,9 @@ public class MainActivity extends AppCompatActivity
 
         navigationView.setNavigationItemSelectedListener(this);
 
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                showTransactionDialog();
-//                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-//                        .setAction("Action", null).show();
-            }
-        });
-
         coin = new ArrayList<>();
         amount = new ArrayList<>();
         values = new ArrayList<>();
-
-//        coin.add("BTC");
-//        coin.add("ETH");
-//        coin.add("EOS");
-//        amount.add("0.35");
-//        amount.add("11");
-//        amount.add("27");
-//        values.add("1000");
-//        values.add("1600");
-//        values.add("2000");
 
         calculateSumPortfolio();
 
@@ -200,6 +178,11 @@ public class MainActivity extends AppCompatActivity
                 mDrawer.closeDrawer(Gravity.LEFT);
                 toggle.syncState();
             }
+            return true;
+        }
+        if (id == R.id.action_add)
+        {
+            showTransactionDialog();
             return true;
         }
 

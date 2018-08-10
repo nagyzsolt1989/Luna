@@ -53,6 +53,7 @@ public class MarketActivity extends AppCompatActivity implements NavigationView.
     private ArrayAdapter<String> adapter;
     private MarketAdapter mMarketAdapter;
     private JSONObject marketPrices;
+    private String currencySymbol;
     ArrayList<String> coin, mDailyChange, mMarketValue;
 
     @Override
@@ -96,6 +97,8 @@ public class MarketActivity extends AppCompatActivity implements NavigationView.
         coin.add("NEO");
         coin.add("DASH");
 
+        currencySymbol = "$";
+
     }
 
     private void launchDetailActivity(int position) {
@@ -104,6 +107,14 @@ public class MarketActivity extends AppCompatActivity implements NavigationView.
         intent.putExtra(Constants.EXTRA_CURRENCY, coin.get(position).toString());
         startActivity(intent);
         this.overridePendingTransition(R.anim.slide_from_right, R.anim.fade_out);
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        //Hide add menu item
+        MenuItem actionAdd = mToolbar.getMenu().findItem(R.id.action_add);
+        actionAdd.setVisible(false);
+        return super.onPrepareOptionsMenu(menu);
     }
 
     @Override

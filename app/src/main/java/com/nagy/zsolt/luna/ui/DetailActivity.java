@@ -12,10 +12,21 @@ import android.support.v7.widget.Toolbar;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.nagy.zsolt.luna.R;
+import com.nagy.zsolt.luna.data.FetchDataListener;
+import com.nagy.zsolt.luna.data.GetAPIRequest;
+import com.nagy.zsolt.luna.data.RequestQueueService;
+import com.nagy.zsolt.luna.utils.MarketAdapter;
+
+import org.json.JSONObject;
+
+import java.text.DecimalFormat;
+import java.util.Iterator;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -33,7 +44,14 @@ public class DetailActivity extends AppCompatActivity implements NavigationView.
     DrawerLayout mDrawer;
     @BindView(R.id.nav_view)
     NavigationView navigationView;
+    @BindView(R.id.tv_last_value)
+    TextView mLastValue;
+    @BindView(R.id.tv_high_value)
+    TextView mHighValue;
+    @BindView(R.id.tv_low_value)
+    TextView mLowValue;
     private ActionBarDrawerToggle toggle;
+    private JSONObject coinDetails;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,11 +86,21 @@ public class DetailActivity extends AppCompatActivity implements NavigationView.
 
         String currencyName = intent.getStringExtra(EXTRA_CURRENCY);
         mCurrencyName.setText(currencyName);
+
+        getCoinDetails(currencyName);
     }
 
     private void closeOnError() {
         finish();
         Toast.makeText(this, R.string.detail_error_message, Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        //Hide add menu item
+        MenuItem actionAdd = mToolbar.getMenu().findItem(R.id.action_add);
+        actionAdd.setVisible(false);
+        return super.onPrepareOptionsMenu(menu);
     }
 
     @Override
@@ -106,7 +134,6 @@ public class DetailActivity extends AppCompatActivity implements NavigationView.
         return super.onOptionsItemSelected(item);
     }
 
-    @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
@@ -130,4 +157,77 @@ public class DetailActivity extends AppCompatActivity implements NavigationView.
 
         return true;
     }
+
+    public void getCoinDetails(String coin) {
+
+        try {
+            //Create Instance of GETAPIRequest and call it's
+            //request() method
+            String url = "https://min-api.cryptocompare.com/data/pricemultifull?fsyms=" + coin + "&tsyms=USD,EUR";
+            System.out.println(url);
+            GetAPIRequest getapiRequest = new GetAPIRequest();
+            getapiRequest.request(this, fetchGetResultListener, url);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    //Implementing interfaces of FetchDataListener for GET api request
+    FetchDataListener fetchGetResultListener = new FetchDataListener() {
+        @Override
+        public void onFetchComplete(JSONObject data) {
+            //Fetch Complete. Now stop progress bar  or loader
+            //you started in onFetchStart
+            RequestQueueService.cancelProgressDialog();
+            try {
+                //Check result sent by our GETAPIRequest class
+                if (data != null) {
+                    System.out.println(data);
+                    coinDetails = data.getJSONObject("RAW");
+
+                    Iterator<String> keysItr = coinDetails.keys();
+
+                    //Iterating over the JSON and save values
+                    while (keysItr.hasNext()) {
+                        String key = keysItr.next();
+                        JSONObject coinObject = coinDetails.getJSONObject(key);
+
+                        //Get the PRICE and CHANGEPCTDAY value and format it to 2 decimals
+                        DecimalFormat df = new DecimalFormat("#.##");
+                        Double tempMarketPrice = (Double.valueOf(df.format(coinObject.getJSONObject("USD").getDouble("PRICE"))));
+                        Double tempLow24Hour = (Double.valueOf(df.format(coinObject.getJSONObject("USD").getDouble("LOW24HOUR"))));
+                        Double tempHigh24Hour = (Double.valueOf(df.format(coinObject.getJSONObject("USD").getDouble("LOW24HOUR"))));
+
+                        mLastValue.setText(String.valueOf(tempMarketPrice));
+                        mHighValue.setText(String.valueOf(tempHigh24Hour));
+                        mLowValue.setText(String.valueOf(tempLow24Hour));
+                    }
+
+
+
+                } else {
+                    RequestQueueService.showAlert(getString(R.string.noDataAlert), DetailActivity.this);
+                }
+            } catch (
+                    Exception e) {
+                RequestQueueService.showAlert(getString(R.string.exceptionAlert), DetailActivity.this);
+                e.printStackTrace();
+            }
+
+        }
+
+        @Override
+        public void onFetchFailure(String msg) {
+            RequestQueueService.cancelProgressDialog();
+            //Show if any error message is there called from GETAPIRequest class
+            RequestQueueService.showAlert(msg, DetailActivity.this);
+        }
+
+        @Override
+        public void onFetchStart() {
+            //Start showing progressbar or any loader you have
+            RequestQueueService.showProgressDialog(DetailActivity.this);
+        }
+    };
 }
