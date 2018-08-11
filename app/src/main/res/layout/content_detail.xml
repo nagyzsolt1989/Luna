@@ -87,8 +87,8 @@
             grid:layout_gravity="fill_horizontal"/>
 
         <TextView
-            android:id="@+id/tv_last_value"
-            android:text="Last"
+            android:id="@+id/tv_low"
+            android:text="Low"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             grid:layout_columnWeight="1"
@@ -107,22 +107,14 @@
             />
 
         <TextView
-            android:id="@+id/tv_high_value"
-            android:text="High"
+            android:id="@+id/tv_last_value"
+            android:text="Last"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             grid:layout_columnWeight="1"
             android:gravity="center"
-            grid:layout_gravity="fill_horizontal"
-            />
-
-        <TextView
-            android:id="@+id/tv_low"
-            android:text="Low"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            grid:layout_columnWeight="1"
-            android:gravity="center"
+            android:textColor="@color/white"
+            android:textSize="18sp"
             grid:layout_gravity="fill_horizontal"
             />
 
@@ -133,6 +125,20 @@
             android:layout_height="wrap_content"
             grid:layout_columnWeight="1"
             android:gravity="center"
+            android:textColor="@color/white"
+            android:textSize="18sp"
+            grid:layout_gravity="fill_horizontal"
+            />
+
+        <TextView
+            android:id="@+id/tv_high_value"
+            android:text="High"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            grid:layout_columnWeight="1"
+            android:gravity="center"
+            android:textColor="@color/white"
+            android:textSize="18sp"
             grid:layout_gravity="fill_horizontal"
             />
 
@@ -147,28 +153,8 @@
             />
 
         <TextView
-            android:id="@+id/tv_percentage_value"
-            android:text="Percentage"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            grid:layout_columnWeight="1"
-            android:gravity="center"
-            grid:layout_gravity="fill_horizontal"
-            />
-
-        <TextView
             android:id="@+id/tv_absolute"
-            android:text="absolute"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            grid:layout_columnWeight="1"
-            android:gravity="center"
-            grid:layout_gravity="fill_horizontal"
-            />
-
-        <TextView
-            android:id="@+id/tv_absolute_value"
-            android:text="absolute"
+            android:text="Absolute"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             grid:layout_columnWeight="1"
@@ -178,7 +164,7 @@
 
         <TextView
             android:id="@+id/tv_volume"
-            android:text="volume"
+            android:text="Volume"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             grid:layout_columnWeight="1"
@@ -187,12 +173,38 @@
             />
 
         <TextView
-            android:id="@+id/tv_volume_value"
-            android:text="volume"
+            android:id="@+id/tv_percentage_value"
+            android:text="Percentage Value"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             grid:layout_columnWeight="1"
             android:gravity="center"
+            android:textColor="@color/white"
+            android:textSize="18sp"
+            grid:layout_gravity="fill_horizontal"
+            />
+
+        <TextView
+            android:id="@+id/tv_absolute_value"
+            android:text="Absolute Value"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            grid:layout_columnWeight="1"
+            android:gravity="center"
+            android:textColor="@color/white"
+            android:textSize="18sp"
+            grid:layout_gravity="fill_horizontal"
+            />
+
+        <TextView
+            android:id="@+id/tv_volume_value"
+            android:text="Volume Value"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            grid:layout_columnWeight="1"
+            android:gravity="center"
+            android:textColor="@color/white"
+            android:textSize="18sp"
             grid:layout_gravity="fill_horizontal"
             />
 

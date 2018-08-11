@@ -4,5 +4,6 @@
     <color name="colorPrimaryLight">#4f5b62</color>
     <color name="colorPrimaryDark">#000a12</color>
     <color name="colorAccent">#f5e7de</color>
+    <color name="colorSnackbar">#FF5252</color>
     <color name="white">#ffffff</color>
 </resources>

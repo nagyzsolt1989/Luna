@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.text.format.DateFormat;
 import android.text.format.Time;
@@ -39,6 +40,7 @@ import com.nagy.zsolt.luna.utils.SwipeDismissListViewTouchListener;
 
 import org.json.JSONObject;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -76,7 +78,6 @@ public class MainActivity extends AppCompatActivity
     Button mTransactionDate;
     private PortfolioAdapter mPortfolioAdapter;
     private ActionBarDrawerToggle toggle;
-    JSONObject coinsJsonArray;
     ArrayList<String> coin, amount, values;
     double mSumPortfolio;
 
@@ -215,11 +216,11 @@ public class MainActivity extends AppCompatActivity
     private void showTransactionDialog() {
 
         LayoutInflater inflater = LayoutInflater.from(this);
-        View dialog_layout = inflater.inflate(R.layout.dialog_transaction, (ViewGroup) findViewById(R.id.dialog_linear_layout));
+        final View mDialogView = inflater.inflate(R.layout.dialog_transaction, (ViewGroup) findViewById(R.id.dialog_linear_layout));
 
         AlertDialog.Builder db = new AlertDialog.Builder(this);
-        ButterKnife.bind(this, dialog_layout);
-        db.setView(dialog_layout);
+        ButterKnife.bind(this, mDialogView);
+        db.setView(mDialogView);
         db.setTitle("New Transaction");
 
         mTransactionDate.setShowSoftInputOnFocus(false);
@@ -240,10 +241,6 @@ public class MainActivity extends AppCompatActivity
         {
             public void onClick(DialogInterface dialog, int which) {
 
-                coin.add(mCurrencySpinner.getSelectedItem().toString());
-                amount.add(mAmount.getText().toString());
-                getCoinPrice(mCurrencySpinner.getSelectedItem().toString());
-
             }
         });
         db.setNegativeButton("Cancel", new DialogInterface.OnClickListener()
@@ -253,7 +250,31 @@ public class MainActivity extends AppCompatActivity
                 dialog.dismiss();
             }
         });
-        AlertDialog dialog = db.show();
+        final AlertDialog dialog = db.show();
+
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                if (mAmount.getText().toString().length() == 0) {
+                    Snackbar snackbar = Snackbar.make(mDialogView, "Please add an amount for the transaction!",Snackbar.LENGTH_SHORT);
+                    View snackBarView = snackbar.getView();
+                    snackBarView.setBackgroundColor(getResources().getColor(R.color.colorSnackbar));
+                    snackbar.show();
+                } else if (mTransactionDate.getText().toString().length() == 0) {
+                    Snackbar snackbar = Snackbar.make(mDialogView, "Please add a date for the transaction!", Snackbar.LENGTH_SHORT);
+                    View snackBarView = snackbar.getView();
+                    snackBarView.setBackgroundColor(getResources().getColor(R.color.colorSnackbar));
+                    snackbar.show();
+                } else{
+                    coin.add(mCurrencySpinner.getSelectedItem().toString());
+                    amount.add(mAmount.getText().toString());
+                    getCoinPrice(mCurrencySpinner.getSelectedItem().toString());
+                    dialog.dismiss();
+                }
+            }
+        });
     }
 
     public void getCoinPrice(String coin) {
@@ -286,7 +307,8 @@ public class MainActivity extends AppCompatActivity
                     double price = data.getDouble("USD");
                     double value = amount * price;
                     System.out.println(Double.toString(value));
-                    values.add(Double.toString(value));
+                    DecimalFormat df = new DecimalFormat("#.##");
+                    values.add(Double.toString(Double.valueOf(df.format(value))));
                     mPortfolioAdapter.notifyDataSetChanged();
                     calculateSumPortfolio();
                 } else {
@@ -331,7 +353,8 @@ public class MainActivity extends AppCompatActivity
             mSumPortfolio += Double.parseDouble(values.get(i));
         }
         System.out.println("mSumPortfolio: " + mSumPortfolio);
-        mSumPortfolioTV.setText(Double.toString(mSumPortfolio));
+        DecimalFormat df = new DecimalFormat("#.##");
+        mSumPortfolioTV.setText(Double.toString(Double.valueOf(df.format(mSumPortfolio))).concat(" $"));
     }
 
     @Override

@@ -50,6 +50,12 @@ public class DetailActivity extends AppCompatActivity implements NavigationView.
     TextView mHighValue;
     @BindView(R.id.tv_low_value)
     TextView mLowValue;
+    @BindView(R.id.tv_absolute_value)
+    TextView mAbsValue;
+    @BindView(R.id.tv_percentage_value)
+    TextView mPctValue;
+    @BindView(R.id.tv_volume_value)
+    TextView mVolumeValue;
     private ActionBarDrawerToggle toggle;
     private JSONObject coinDetails;
 
@@ -193,15 +199,21 @@ public class DetailActivity extends AppCompatActivity implements NavigationView.
                         String key = keysItr.next();
                         JSONObject coinObject = coinDetails.getJSONObject(key);
 
-                        //Get the PRICE and CHANGEPCTDAY value and format it to 2 decimals
+                        //Get the values from the JSON
                         DecimalFormat df = new DecimalFormat("#.##");
                         Double tempMarketPrice = (Double.valueOf(df.format(coinObject.getJSONObject("USD").getDouble("PRICE"))));
                         Double tempLow24Hour = (Double.valueOf(df.format(coinObject.getJSONObject("USD").getDouble("LOW24HOUR"))));
-                        Double tempHigh24Hour = (Double.valueOf(df.format(coinObject.getJSONObject("USD").getDouble("LOW24HOUR"))));
+                        Double tempHigh24Hour = (Double.valueOf(df.format(coinObject.getJSONObject("USD").getDouble("HIGH24HOUR"))));
+                        Double tempChange24Hour = (Double.valueOf(df.format(coinObject.getJSONObject("USD").getDouble("CHANGE24HOUR"))));
+                        Double tempChangePct24Hour = (Double.valueOf(df.format(coinObject.getJSONObject("USD").getDouble("CHANGEPCT24HOUR"))));
+                        Double tempVolume24Hour = (Double.valueOf(df.format(coinObject.getJSONObject("USD").getDouble("VOLUME24HOUR"))));
 
-                        mLastValue.setText(String.valueOf(tempMarketPrice));
-                        mHighValue.setText(String.valueOf(tempHigh24Hour));
-                        mLowValue.setText(String.valueOf(tempLow24Hour));
+                        mLastValue.setText(String.valueOf(tempMarketPrice).concat(" $"));
+                        mHighValue.setText(String.valueOf(tempHigh24Hour).concat(" $"));
+                        mLowValue.setText(String.valueOf(tempLow24Hour).concat(" $"));
+                        mAbsValue.setText(String.valueOf(tempChange24Hour).concat(" $"));
+                        mPctValue.setText(String.valueOf(tempChangePct24Hour).concat(" %"));
+                        mVolumeValue.setText(String.valueOf(tempVolume24Hour).concat(" $"));
                     }
 
 
