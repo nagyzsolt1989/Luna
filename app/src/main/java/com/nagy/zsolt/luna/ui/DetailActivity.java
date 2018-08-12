@@ -2,7 +2,6 @@ package com.nagy.zsolt.luna.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
 import android.support.v4.widget.DrawerLayout;
@@ -12,16 +11,13 @@ import android.support.v7.widget.Toolbar;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.AdapterView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.nagy.zsolt.luna.R;
-import com.nagy.zsolt.luna.data.FetchDataListener;
-import com.nagy.zsolt.luna.data.GetAPIRequest;
-import com.nagy.zsolt.luna.data.RequestQueueService;
-import com.nagy.zsolt.luna.utils.MarketAdapter;
+import com.nagy.zsolt.luna.data.api.FetchDataListener;
+import com.nagy.zsolt.luna.data.api.GetAPIRequest;
+import com.nagy.zsolt.luna.data.api.RequestQueueService;
 
 import org.json.JSONObject;
 

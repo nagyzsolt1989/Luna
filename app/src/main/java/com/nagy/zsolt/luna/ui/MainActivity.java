@@ -5,11 +5,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
-import android.text.format.DateFormat;
-import android.text.format.Time;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,7 +20,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -32,9 +28,11 @@ import android.widget.TextView;
 
 import com.nagy.zsolt.luna.R;
 import com.nagy.zsolt.luna.data.Constants;
-import com.nagy.zsolt.luna.data.FetchDataListener;
-import com.nagy.zsolt.luna.data.GetAPIRequest;
-import com.nagy.zsolt.luna.data.RequestQueueService;
+import com.nagy.zsolt.luna.data.api.FetchDataListener;
+import com.nagy.zsolt.luna.data.api.GetAPIRequest;
+import com.nagy.zsolt.luna.data.api.RequestQueueService;
+import com.nagy.zsolt.luna.data.database.AppDatabase;
+import com.nagy.zsolt.luna.data.database.PortfolioEntry;
 import com.nagy.zsolt.luna.utils.PortfolioAdapter;
 import com.nagy.zsolt.luna.utils.SwipeDismissListViewTouchListener;
 
@@ -42,7 +40,6 @@ import org.json.JSONObject;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
 
@@ -76,10 +73,12 @@ public class MainActivity extends AppCompatActivity
     @Nullable
     @BindView(R.id.transaction_date)
     Button mTransactionDate;
+    private AppDatabase mDb;
     private PortfolioAdapter mPortfolioAdapter;
     private ActionBarDrawerToggle toggle;
-    ArrayList<String> coin, amount, values;
-    double mSumPortfolio;
+    private ArrayList<String> coin, amount, values;
+    List<PortfolioEntry> mPortfoioEntries;
+    private double mSumPortfolio;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,6 +86,14 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
 
+        mDb = AppDatabase.getsInstance(getApplicationContext());
+
+        initViews();
+//        calculateSumPortfolio();
+
+    }
+
+    private void initViews() {
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
@@ -100,13 +107,11 @@ public class MainActivity extends AppCompatActivity
 
         navigationView.setNavigationItemSelectedListener(this);
 
-        coin = new ArrayList<>();
-        amount = new ArrayList<>();
-        values = new ArrayList<>();
+//        coin = new ArrayList<>();
+//        amount = new ArrayList<>();
+//        values = new ArrayList<>();
 
-        calculateSumPortfolio();
-
-        mPortfolioAdapter = new PortfolioAdapter(this, coin, amount, values);
+        mPortfolioAdapter = new PortfolioAdapter(this, mDb.portfolioDao().loadAllCoins(), mDb.portfolioDao().loadAllAmounts(), mDb.portfolioDao().loadAllDates());
 
 
         // Assign adapter to ListView
@@ -141,7 +146,12 @@ public class MainActivity extends AppCompatActivity
                 launchDetailActivity(position);
             }
         });
+    }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mPortfolioAdapter = new PortfolioAdapter(this, mDb.portfolioDao().loadAllCoins(), mDb.portfolioDao().loadAllAmounts(), mDb.portfolioDao().loadAllDates());
     }
 
     @Override
@@ -268,9 +278,15 @@ public class MainActivity extends AppCompatActivity
                     snackBarView.setBackgroundColor(getResources().getColor(R.color.colorSnackbar));
                     snackbar.show();
                 } else{
-                    coin.add(mCurrencySpinner.getSelectedItem().toString());
-                    amount.add(mAmount.getText().toString());
+//                    coin.add(mCurrencySpinner.getSelectedItem().toString());
+//                    amount.add(mAmount.getText().toString());
+
+                    //Save Transaction to the Database
+                    PortfolioEntry portfolioEntry = new PortfolioEntry(mCurrencySpinner.getSelectedItem().toString(), mAmount.getText().toString(), mTransactionDate.getText().toString());
+                    mDb.portfolioDao().insertPortfolio(portfolioEntry);
+                    finish();
                     getCoinPrice(mCurrencySpinner.getSelectedItem().toString());
+
                     dialog.dismiss();
                 }
             }
@@ -347,6 +363,7 @@ public class MainActivity extends AppCompatActivity
     private void calculateSumPortfolio(){
 
         mSumPortfolioTV = findViewById(R.id.tv_portfolio_value);
+
 
         mSumPortfolio = 0.0;
         for(int i = 0; i < values.size(); i++) {

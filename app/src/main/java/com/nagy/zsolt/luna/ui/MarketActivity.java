@@ -2,7 +2,6 @@ package com.nagy.zsolt.luna.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
 import android.support.v4.widget.DrawerLayout;
@@ -19,19 +18,16 @@ import android.widget.ListView;
 
 import com.nagy.zsolt.luna.R;
 import com.nagy.zsolt.luna.data.Constants;
-import com.nagy.zsolt.luna.data.FetchDataListener;
-import com.nagy.zsolt.luna.data.GetAPIRequest;
-import com.nagy.zsolt.luna.data.RequestQueueService;
+import com.nagy.zsolt.luna.data.api.FetchDataListener;
+import com.nagy.zsolt.luna.data.api.GetAPIRequest;
+import com.nagy.zsolt.luna.data.api.RequestQueueService;
 import com.nagy.zsolt.luna.utils.MarketAdapter;
 
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
-import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;

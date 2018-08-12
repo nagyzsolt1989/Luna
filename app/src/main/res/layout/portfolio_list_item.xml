@@ -50,26 +50,42 @@
         android:layout_alignParentRight="true"
         android:layout_marginRight="6dp">
 
+    </android.support.constraint.ConstraintLayout>
+
+    <android.support.constraint.ConstraintLayout
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="16dp"
+        android:layout_alignParentRight="true"
+        android:layout_marginTop="3dp">
+
         <TextView
             android:id="@+id/value"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_marginTop="8dp"
             android:text="1000"
             android:textSize="20sp"
+            app:layout_constraintEnd_toStartOf="@+id/currency_symbol"
             app:layout_constraintTop_toTopOf="parent"/>
 
         <TextView
             android:id="@+id/currency_symbol"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_marginTop="8dp"
             android:text=" $"
             android:textSize="20sp"
-            app:layout_constraintStart_toEndOf="@id/value"
-            app:layout_constraintTop_toTopOf="parent"/>
+            android:gravity="end"
+            app:layout_constraintEnd_toEndOf="parent"/>
+
+        <TextView
+            android:id="@+id/transaction_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="2017.10.10"
+            android:textSize="16sp"
+            android:gravity="end"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/value"/>
 
     </android.support.constraint.ConstraintLayout>
 

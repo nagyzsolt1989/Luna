@@ -1,4 +1,4 @@
-package com.nagy.zsolt.luna.data;
+package com.nagy.zsolt.luna.data.api;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -6,7 +6,6 @@ import android.app.Dialog;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
-import android.support.v4.app.FragmentActivity;
 import android.view.Window;
 
 import com.android.volley.DefaultRetryPolicy;

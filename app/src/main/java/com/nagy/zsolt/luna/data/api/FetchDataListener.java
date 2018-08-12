@@ -1,4 +1,4 @@
-package com.nagy.zsolt.luna.data;
+package com.nagy.zsolt.luna.data.api;
 
 import org.json.JSONObject;
 
