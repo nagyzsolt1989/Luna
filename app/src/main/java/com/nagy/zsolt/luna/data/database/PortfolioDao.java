@@ -15,13 +15,13 @@ public interface PortfolioDao {
     List<PortfolioEntry> loadAllPortfolioEntries();
 
     @Query("SELECT coin FROM Portfolio ORDER BY date")
-    String[] loadAllCoins();
+    List<String> loadAllCoins();
 
     @Query("SELECT amount FROM Portfolio ORDER BY date")
-    String[] loadAllAmounts();
+    List<String> loadAllAmounts();
 
     @Query("SELECT date FROM Portfolio ORDER BY date")
-    String[] loadAllDates();
+    List<String> loadAllDates();
 
     @Insert
     void insertPortfolio(PortfolioEntry portfolioEntry);

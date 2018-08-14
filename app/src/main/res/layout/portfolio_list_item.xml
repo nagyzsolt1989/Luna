@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:app="http://schemas.android.com/apk/res-auto"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                xmlns:app="http://schemas.android.com/apk/res-auto"
                 android:orientation="horizontal"
                 android:padding="5dip">
 
@@ -35,29 +35,40 @@
         />
 
     <TextView
-        android:id="@+id/amount"
+        android:id="@+id/transaction_date"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/coin"
         android:layout_marginTop="1dip"
         android:layout_toRightOf="@+id/thumbnail"
-        android:text="0.35"
+        android:text="2017.10.10"
         android:textSize="16sp"/>
 
-    <android.support.constraint.ConstraintLayout
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_marginRight="6dp">
+        android:foregroundGravity="center">
 
-    </android.support.constraint.ConstraintLayout>
+        <TextView
+            android:id="@+id/amount"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:foregroundGravity="center"
+            android:gravity="center"
+            android:paddingLeft="20dp"
+            android:paddingTop="16dp"
+            android:text="0.35"
+            android:textSize="16sp"/>
+
+    </LinearLayout>
 
     <android.support.constraint.ConstraintLayout
         android:layout_width="100dp"
         android:layout_height="wrap_content"
-        android:layout_marginRight="16dp"
         android:layout_alignParentRight="true"
-        android:layout_marginTop="3dp">
+        android:layout_marginRight="16dp"
+        android:layout_marginTop="3dp"
+        android:paddingTop="6dp">
 
         <TextView
             android:id="@+id/value"
@@ -72,20 +83,10 @@
             android:id="@+id/currency_symbol"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:gravity="end"
             android:text=" $"
             android:textSize="20sp"
-            android:gravity="end"
             app:layout_constraintEnd_toEndOf="parent"/>
-
-        <TextView
-            android:id="@+id/transaction_date"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="2017.10.10"
-            android:textSize="16sp"
-            android:gravity="end"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/value"/>
 
     </android.support.constraint.ConstraintLayout>
 

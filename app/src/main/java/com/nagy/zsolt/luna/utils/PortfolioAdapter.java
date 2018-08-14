@@ -16,18 +16,19 @@ import java.util.ArrayList;
 public class PortfolioAdapter extends BaseAdapter {
 
     private final Context mContext;
-    private final String[] coin, amount, value;
+    private final ArrayList<String> coin, date, amount, value;
 
-    public PortfolioAdapter(Context context, String[] coin, String[] amount, String[] value) {
+    public PortfolioAdapter(Context context, ArrayList<String> coin, ArrayList<String> date, ArrayList<String> amount, ArrayList<String> value) {
         this.mContext = context;
         this.coin = coin;
+        this.date = date;
         this.amount = amount;
         this.value = value;
     }
 
     @Override
     public int getCount() {
-        return coin.length;
+        return coin.size();
     }
 
     @Override
@@ -54,10 +55,12 @@ public class PortfolioAdapter extends BaseAdapter {
         TextView tt1 = (TextView) convertView.findViewById(R.id.coin);
         TextView tt2 = (TextView) convertView.findViewById(R.id.amount);
         TextView tt3 = (TextView) convertView.findViewById(R.id.value);
+        TextView tt4 = (TextView) convertView.findViewById(R.id.transaction_date);
 
-        tt1.setText(coin[position]);
-        tt2.setText(amount[position]);
-        tt3.setText(value[position]);
+        tt1.setText(coin.get(position));
+        tt2.setText(amount.get(position));
+        tt3.setText(value.get(position));
+        tt4.setText(date.get(position));
 
         return convertView;
     }

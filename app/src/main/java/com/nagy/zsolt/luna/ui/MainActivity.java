@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -41,6 +42,7 @@ import org.json.JSONObject;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Iterator;
 import java.util.List;
 
 import butterknife.BindView;
@@ -76,7 +78,7 @@ public class MainActivity extends AppCompatActivity
     private AppDatabase mDb;
     private PortfolioAdapter mPortfolioAdapter;
     private ActionBarDrawerToggle toggle;
-    private ArrayList<String> coin, amount, values;
+    private ArrayList<String> coin, amount, date, values;
     List<PortfolioEntry> mPortfoioEntries;
     private double mSumPortfolio;
 
@@ -107,15 +109,28 @@ public class MainActivity extends AppCompatActivity
 
         navigationView.setNavigationItemSelectedListener(this);
 
-//        coin = new ArrayList<>();
-//        amount = new ArrayList<>();
-//        values = new ArrayList<>();
+        coin = new ArrayList<>();
+        amount = new ArrayList<>();
+        date = new ArrayList<>();
+        values = new ArrayList<>();
 
-        mPortfolioAdapter = new PortfolioAdapter(this, mDb.portfolioDao().loadAllCoins(), mDb.portfolioDao().loadAllAmounts(), mDb.portfolioDao().loadAllDates());
+        coin.addAll(mDb.portfolioDao().loadAllCoins());
+        amount.addAll(mDb.portfolioDao().loadAllAmounts());
+        date.addAll(mDb.portfolioDao().loadAllDates());
 
+        //Make a string from all of the coins
+        StringBuilder allCoins = new StringBuilder();
+        String prefix = "";
+        for (String s : coin)
+        {
+            allCoins.append(prefix);
+            prefix = ",";
+            allCoins.append(s);
+        }
 
-        // Assign adapter to ListView
-        mPortfolioListView.setAdapter(mPortfolioAdapter);
+        if (coin.size() > 0){
+            updatePortfolioPrices(allCoins.toString());
+        }
 
         SwipeDismissListViewTouchListener touchListener =
                 new SwipeDismissListViewTouchListener(
@@ -130,8 +145,8 @@ public class MainActivity extends AppCompatActivity
                             public void onDismiss(ListView listView, int[] reverseSortedPositions) {
                                 for (int position : reverseSortedPositions) {
 
-                                    coin.remove(position);
-                                    values.remove(position);
+//                                    coin.remove(position);
+//                                    values.remove(position);
                                     mPortfolioAdapter.notifyDataSetChanged();
                                     calculateSumPortfolio();
 
@@ -151,7 +166,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onResume() {
         super.onResume();
-        mPortfolioAdapter = new PortfolioAdapter(this, mDb.portfolioDao().loadAllCoins(), mDb.portfolioDao().loadAllAmounts(), mDb.portfolioDao().loadAllDates());
+//        mPortfolioAdapter = new PortfolioAdapter(this, mDb.portfolioDao().loadAllCoins(), mDb.portfolioDao().loadAllAmounts(), mDb.portfolioDao().loadAllDates());
     }
 
     @Override
@@ -284,8 +299,20 @@ public class MainActivity extends AppCompatActivity
                     //Save Transaction to the Database
                     PortfolioEntry portfolioEntry = new PortfolioEntry(mCurrencySpinner.getSelectedItem().toString(), mAmount.getText().toString(), mTransactionDate.getText().toString());
                     mDb.portfolioDao().insertPortfolio(portfolioEntry);
-                    finish();
+                    if(coin.size() < 1){
+                        coin.addAll(mDb.portfolioDao().loadAllCoins());
+                        amount.addAll(mDb.portfolioDao().loadAllAmounts());
+                        date.addAll(mDb.portfolioDao().loadAllDates());
+                        values.add("0");
+
+                        mPortfolioAdapter = new PortfolioAdapter(MainActivity.this, coin, amount, date, values);
+
+                        // Assign adapter to ListView
+                        mPortfolioListView.setAdapter(mPortfolioAdapter);
+                    }
+
                     getCoinPrice(mCurrencySpinner.getSelectedItem().toString());
+                    mPortfolioAdapter.notifyDataSetChanged();
 
                     dialog.dismiss();
                 }
@@ -321,12 +348,81 @@ public class MainActivity extends AppCompatActivity
                 if (data != null) {
                     double amount = Double.parseDouble(mAmount.getText().toString());
                     double price = data.getDouble("USD");
+                    System.out.println("The price " + price);
                     double value = amount * price;
-                    System.out.println(Double.toString(value));
                     DecimalFormat df = new DecimalFormat("#.##");
                     values.add(Double.toString(Double.valueOf(df.format(value))));
-                    mPortfolioAdapter.notifyDataSetChanged();
                     calculateSumPortfolio();
+                } else {
+                    RequestQueueService.showAlert(getString(R.string.noDataAlert), MainActivity.this);
+                }
+            } catch (
+                    Exception e) {
+                RequestQueueService.showAlert(getString(R.string.exceptionAlert), MainActivity.this);
+                e.printStackTrace();
+            }
+
+        }
+
+        @Override
+        public void onFetchFailure(String msg) {
+            RequestQueueService.cancelProgressDialog();
+            //Show if any error message is there called from GETAPIRequest class
+            RequestQueueService.showAlert(msg, MainActivity.this);
+        }
+
+        @Override
+        public void onFetchStart() {
+            //Start showing progressbar or any loader you have
+            RequestQueueService.showProgressDialog(MainActivity.this);
+        }
+    };
+
+    public void updatePortfolioPrices(String coinString) {
+
+        try {
+            //Create Instance of GETAPIRequest and call it's
+            //request() method
+            String url = "https://min-api.cryptocompare.com/data/pricemulti?fsyms=" + coinString + "&tsyms=BTC,USD,EUR";
+            System.out.println(url);
+            GetAPIRequest getapiRequest = new GetAPIRequest();
+            getapiRequest.request(this, fetchGetPricesResultListener, url);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    FetchDataListener fetchGetPricesResultListener = new FetchDataListener() {
+        @Override
+        public void onFetchComplete(JSONObject data) {
+            //Fetch Complete. Now stop progress bar  or loader
+            //you started in onFetchStart
+            RequestQueueService.cancelProgressDialog();
+            try {
+                //Check result sent by our GETAPIRequest class
+                if (data != null) {
+                    Iterator<String> keysItr = data.keys();
+
+                    //Iterating over the JSON and save values
+                    int i = 0;
+                    while (keysItr.hasNext()) {
+                        String key = keysItr.next();
+                        JSONObject coinObject = data.getJSONObject(key);
+
+                        //Get the PRICE value and format it to 2 decimals
+                        DecimalFormat df = new DecimalFormat("#.##");
+                        Double coinPrice = (Double.valueOf(df.format(coinObject.getDouble("USD"))));
+                        double value = Double.parseDouble(amount.get(i)) * coinPrice;
+                        System.out.println(value);
+                        values.add(Double.toString(Double.valueOf(df.format(value))));
+                        i++;
+                    }
+
+                    mPortfolioAdapter = new PortfolioAdapter(MainActivity.this, coin, amount, date, values);
+
+                    // Assign adapter to ListView
+                    mPortfolioListView.setAdapter(mPortfolioAdapter);
+
                 } else {
                     RequestQueueService.showAlert(getString(R.string.noDataAlert), MainActivity.this);
                 }
@@ -355,7 +451,7 @@ public class MainActivity extends AppCompatActivity
     private void launchDetailActivity(int position) {
         Intent intent = new Intent(this, DetailActivity.class);
         intent.putExtra(Constants.EXTRA_POSITION, position);
-        intent.putExtra(Constants.EXTRA_CURRENCY, coin.get(position).toString());
+        intent.putExtra(Constants.EXTRA_CURRENCY, coin.get(position));
         startActivity(intent);
         this.overridePendingTransition(R.anim.slide_from_right, R.anim.fade_out);
     }
