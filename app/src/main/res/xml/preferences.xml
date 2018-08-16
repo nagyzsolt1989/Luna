@@ -1,0 +1,23 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+                  xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <ListPreference
+        android:defaultValue="USD"
+        android:dialogTitle="@string/pref_header_currency"
+        android:summary="%s"
+        android:entries="@array/currencies"
+        android:entryValues="@array/currencies"
+        android:key="pref_currency_key"
+        android:title="@string/pref_header_currency"/>
+
+    <ListPreference
+        android:defaultValue="180"
+        android:entries="@array/pref_sync_frequency_titles"
+        android:entryValues="@array/pref_sync_frequency_values"
+        android:summary="%s"
+        android:key="sync_frequency"
+        android:negativeButtonText="@null"
+        android:positiveButtonText="@null"
+        android:title="@string/pref_title_sync_frequency"/>
+
+</PreferenceScreen>

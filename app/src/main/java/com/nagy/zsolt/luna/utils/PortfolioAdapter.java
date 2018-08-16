@@ -10,8 +10,10 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.nagy.zsolt.luna.R;
+import com.nagy.zsolt.luna.data.database.PortfolioEntry;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class PortfolioAdapter extends BaseAdapter {
 

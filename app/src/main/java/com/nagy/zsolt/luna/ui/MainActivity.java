@@ -40,8 +40,10 @@ import com.nagy.zsolt.luna.utils.SwipeDismissListViewTouchListener;
 import org.json.JSONObject;
 
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
@@ -91,7 +93,6 @@ public class MainActivity extends AppCompatActivity
         mDb = AppDatabase.getsInstance(getApplicationContext());
 
         initViews();
-//        calculateSumPortfolio();
 
     }
 
@@ -114,23 +115,28 @@ public class MainActivity extends AppCompatActivity
         date = new ArrayList<>();
         values = new ArrayList<>();
 
-        coin.addAll(mDb.portfolioDao().loadAllCoins());
-        amount.addAll(mDb.portfolioDao().loadAllAmounts());
-        date.addAll(mDb.portfolioDao().loadAllDates());
+        refreshPortfolioData();
 
         //Make a string from all of the coins
         StringBuilder allCoins = new StringBuilder();
         String prefix = "";
-        for (String s : coin)
-        {
+        for (String s : coin) {
             allCoins.append(prefix);
             prefix = ",";
             allCoins.append(s);
         }
 
-        if (coin.size() > 0){
+        if (coin.size() > 0) {
             updatePortfolioPrices(allCoins.toString());
         }
+
+        if (coin.size() < 1) {
+            mPortfolioAdapter = new PortfolioAdapter(MainActivity.this, coin, amount, date, values);
+
+            // Assign adapter to ListView
+            mPortfolioListView.setAdapter(mPortfolioAdapter);
+        }
+
 
         SwipeDismissListViewTouchListener touchListener =
                 new SwipeDismissListViewTouchListener(
@@ -147,6 +153,9 @@ public class MainActivity extends AppCompatActivity
 
 //                                    coin.remove(position);
 //                                    values.remove(position);
+//                                    PortfolioEntry portfolioEntry = new PortfolioEntry();
+
+                                    mDb.portfolioDao().deletePortfolio(mPortfolioAdapter.getItemId(position));
                                     mPortfolioAdapter.notifyDataSetChanged();
                                     calculateSumPortfolio();
 
@@ -206,9 +215,9 @@ public class MainActivity extends AppCompatActivity
             }
             return true;
         }
-        if (id == R.id.action_add)
-        {
+        if (id == R.id.action_add) {
             showTransactionDialog();
+            mPortfolioAdapter.notifyDataSetChanged();
             return true;
         }
 
@@ -249,6 +258,8 @@ public class MainActivity extends AppCompatActivity
         db.setTitle("New Transaction");
 
         mTransactionDate.setShowSoftInputOnFocus(false);
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy.MM.dd");
+        mTransactionDate.setText(dateFormat.format(new Date()).toString());
         mTransactionDate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -277,13 +288,11 @@ public class MainActivity extends AppCompatActivity
         });
         final AlertDialog dialog = db.show();
 
-        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener()
-        {
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v)
-            {
+            public void onClick(View v) {
                 if (mAmount.getText().toString().length() == 0) {
-                    Snackbar snackbar = Snackbar.make(mDialogView, "Please add an amount for the transaction!",Snackbar.LENGTH_SHORT);
+                    Snackbar snackbar = Snackbar.make(mDialogView, "Please add an amount for the transaction!", Snackbar.LENGTH_SHORT);
                     View snackBarView = snackbar.getView();
                     snackBarView.setBackgroundColor(getResources().getColor(R.color.colorSnackbar));
                     snackbar.show();
@@ -292,32 +301,30 @@ public class MainActivity extends AppCompatActivity
                     View snackBarView = snackbar.getView();
                     snackBarView.setBackgroundColor(getResources().getColor(R.color.colorSnackbar));
                     snackbar.show();
-                } else{
+                } else {
 //                    coin.add(mCurrencySpinner.getSelectedItem().toString());
 //                    amount.add(mAmount.getText().toString());
 
                     //Save Transaction to the Database
                     PortfolioEntry portfolioEntry = new PortfolioEntry(mCurrencySpinner.getSelectedItem().toString(), mAmount.getText().toString(), mTransactionDate.getText().toString());
                     mDb.portfolioDao().insertPortfolio(portfolioEntry);
-                    if(coin.size() < 1){
-                        coin.addAll(mDb.portfolioDao().loadAllCoins());
-                        amount.addAll(mDb.portfolioDao().loadAllAmounts());
-                        date.addAll(mDb.portfolioDao().loadAllDates());
-                        values.add("0");
 
-                        mPortfolioAdapter = new PortfolioAdapter(MainActivity.this, coin, amount, date, values);
-
-                        // Assign adapter to ListView
-                        mPortfolioListView.setAdapter(mPortfolioAdapter);
-                    }
-
+                    refreshPortfolioData();
                     getCoinPrice(mCurrencySpinner.getSelectedItem().toString());
-                    mPortfolioAdapter.notifyDataSetChanged();
 
                     dialog.dismiss();
                 }
             }
         });
+    }
+
+    private void refreshPortfolioData() {
+        coin.clear();
+        amount.clear();
+        date.clear();
+        coin.addAll(mDb.portfolioDao().loadAllCoins());
+        amount.addAll(mDb.portfolioDao().loadAllAmounts());
+        date.addAll(mDb.portfolioDao().loadAllDates());
     }
 
     public void getCoinPrice(String coin) {
@@ -353,6 +360,7 @@ public class MainActivity extends AppCompatActivity
                     DecimalFormat df = new DecimalFormat("#.##");
                     values.add(Double.toString(Double.valueOf(df.format(value))));
                     calculateSumPortfolio();
+                    mPortfolioAdapter.notifyDataSetChanged();
                 } else {
                     RequestQueueService.showAlert(getString(R.string.noDataAlert), MainActivity.this);
                 }
@@ -423,6 +431,8 @@ public class MainActivity extends AppCompatActivity
                     // Assign adapter to ListView
                     mPortfolioListView.setAdapter(mPortfolioAdapter);
 
+                    calculateSumPortfolio();
+
                 } else {
                     RequestQueueService.showAlert(getString(R.string.noDataAlert), MainActivity.this);
                 }
@@ -456,13 +466,13 @@ public class MainActivity extends AppCompatActivity
         this.overridePendingTransition(R.anim.slide_from_right, R.anim.fade_out);
     }
 
-    private void calculateSumPortfolio(){
+    private void calculateSumPortfolio() {
 
         mSumPortfolioTV = findViewById(R.id.tv_portfolio_value);
 
 
         mSumPortfolio = 0.0;
-        for(int i = 0; i < values.size(); i++) {
+        for (int i = 0; i < values.size(); i++) {
             mSumPortfolio += Double.parseDouble(values.get(i));
         }
         System.out.println("mSumPortfolio: " + mSumPortfolio);

@@ -10,7 +10,7 @@ import java.util.Date;
 public class PortfolioEntry {
 
     @PrimaryKey(autoGenerate = true)
-    private int id;
+    private long id;
     private String coin, amount, date;
 
     @Ignore
@@ -20,7 +20,7 @@ public class PortfolioEntry {
         this.amount = amount;
     }
 
-    public PortfolioEntry(int id, String coin, String amount, String date) {
+    public PortfolioEntry(long id, String coin, String amount, String date) {
         this.id = id;
         this.coin = coin;
         this.date = date;
@@ -44,7 +44,7 @@ public class PortfolioEntry {
     }
 
     public int getId() {
-        return id;
+        return (int) id;
     }
 
     public String getCoin() {

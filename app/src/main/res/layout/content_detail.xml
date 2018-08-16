@@ -4,6 +4,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:chart="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
@@ -42,13 +43,18 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <ImageView
-            android:id="@+id/iv_moon"
+        <!--<ImageView-->
+            <!--android:id="@+id/iv_moon"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="310dp"-->
+            <!--android:layout_marginTop="?attr/actionBarSize"-->
+            <!--android:background="@drawable/moon"-->
+            <!--android:scaleType="centerCrop"/>-->
+
+        <com.db.chart.view.LineChartView
+            android:id="@+id/linechart"
             android:layout_width="match_parent"
-            android:layout_height="310dp"
-            android:layout_marginTop="?attr/actionBarSize"
-            android:background="@drawable/moon"
-            android:scaleType="centerCrop"/>
+            android:layout_height="100dp"/>
 
     </FrameLayout>
 
