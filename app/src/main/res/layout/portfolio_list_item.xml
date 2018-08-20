@@ -76,17 +76,7 @@
             android:layout_height="wrap_content"
             android:text="1000"
             android:textSize="20sp"
-            app:layout_constraintEnd_toStartOf="@+id/currency_symbol"
             app:layout_constraintTop_toTopOf="parent"/>
-
-        <TextView
-            android:id="@+id/currency_symbol"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:gravity="end"
-            android:text=" $"
-            android:textSize="20sp"
-            app:layout_constraintEnd_toEndOf="parent"/>
 
     </android.support.constraint.ConstraintLayout>
 

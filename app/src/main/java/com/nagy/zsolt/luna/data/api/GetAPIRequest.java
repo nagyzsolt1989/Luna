@@ -26,7 +26,8 @@ public class GetAPIRequest {
                     public void onResponse(JSONObject response) {
                         try {
                             if (listener != null) {
-                                if ((response.has("BTC") || response.has("RAW") || response.has("USD"))){
+                                if (response.has("BTC") || response.has("USD") || response.has("EUR")
+                                        || response.has("RAW") || response.getString("Response").equals("Success")){
                                     //received response
                                     //call onFetchComplete of the listener
                                     listener.onFetchComplete(response);

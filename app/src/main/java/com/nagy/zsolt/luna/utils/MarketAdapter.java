@@ -64,12 +64,12 @@ public class MarketAdapter extends BaseAdapter {
         TextView tt3 = (TextView) convertView.findViewById(R.id.market_value);
 
         tt1.setText(coin.get(position));
-        tt3.setText(marketValue.get(position).concat(" $"));
+        tt3.setText(marketValue.get(position));
 
         //Colorize Market Daily Change
         if(Float.parseFloat(dailyChange.get(position))> 0 ){
             tt2.setTextColor(Color.GREEN);
-            tt2.setText(dailyChange.get(position).concat(" %"));
+            tt2.setText("+"+dailyChange.get(position).concat(" %"));
         }else{
             tt2.setTextColor(Color.RED);
             tt2.setText(dailyChange.get(position).concat(" %"));

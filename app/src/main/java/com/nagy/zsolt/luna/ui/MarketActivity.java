@@ -1,13 +1,17 @@
 package com.nagy.zsolt.luna.ui;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -34,7 +38,7 @@ import butterknife.ButterKnife;
 
 import static java.lang.Math.round;
 
-public class MarketActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+public class MarketActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, SharedPreferences.OnSharedPreferenceChangeListener {
 
     @BindView(R.id.lv_market)
     ListView mMarketListView;
@@ -45,12 +49,16 @@ public class MarketActivity extends AppCompatActivity implements NavigationView.
     DrawerLayout mDrawer;
     @BindView(R.id.nav_view)
     NavigationView navigationView;
+    @BindView(R.id.swiperefresh)
+    SwipeRefreshLayout mSwipeRefreshLayout;
     private ActionBarDrawerToggle toggle;
     private ArrayAdapter<String> adapter;
     private MarketAdapter mMarketAdapter;
     private JSONObject marketPrices;
-    private String currencySymbol;
+    private String prefCurrency;
+    private char currencySymbol;
     ArrayList<String> coin, mDailyChange, mMarketValue;
+    private SharedPreferences settings;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,11 +79,37 @@ public class MarketActivity extends AppCompatActivity implements NavigationView.
 
         navigationView.setNavigationItemSelectedListener(this);
 
+        settings = PreferenceManager.getDefaultSharedPreferences(this);
+        settings.registerOnSharedPreferenceChangeListener(this);
+
+        prefCurrency = settings.getString("pref_currency_key", "USD");
+        if (prefCurrency.equals("USD")) {
+            currencySymbol = '$';
+        } else if (prefCurrency.equals("EUR")) {
+            currencySymbol = '€';
+        }
+
         coin = new ArrayList<>();
         mDailyChange = new ArrayList<>();
         mMarketValue = new ArrayList<>();
 
         getMarketPrices();
+
+        mSwipeRefreshLayout.setOnRefreshListener(
+                new SwipeRefreshLayout.OnRefreshListener()
+
+                {
+                    @Override
+                    public void onRefresh() {
+                        Log.i("onRefresh", "onRefresh called from SwipeRefreshLayout");
+
+                        // This method performs the actual data-refresh operation.
+                        // The method calls setRefreshing(false) when it's finished.
+                        getMarketPrices();
+                        mSwipeRefreshLayout.setRefreshing(false);
+                    }
+                }
+        );
 
         coin.add("BTC");
         coin.add("ETH");
@@ -92,8 +126,6 @@ public class MarketActivity extends AppCompatActivity implements NavigationView.
         coin.add("XMR");
         coin.add("NEO");
         coin.add("DASH");
-
-        currencySymbol = "$";
 
     }
 
@@ -172,7 +204,7 @@ public class MarketActivity extends AppCompatActivity implements NavigationView.
         try {
             //Create Instance of GETAPIRequest and call it's
             //request() method
-            String url = "https://min-api.cryptocompare.com/data/pricemultifull?fsyms=BTC,ETH,XRP,BCH,EOS,XLM,LTC,ADA,USDT,BNB,ETC,TRX,XMR,NEO,DASH&tsyms=USD,EUR";
+            String url = "https://min-api.cryptocompare.com/data/pricemultifull?fsyms=BTC,ETH,XRP,BCH,EOS,XLM,LTC,ADA,USDT,BNB,ETC,TRX,XMR,NEO,DASH&tsyms=" + prefCurrency;
             System.out.println(url);
             GetAPIRequest getapiRequest = new GetAPIRequest();
             getapiRequest.request(this, fetchGetResultListener, url);
@@ -205,9 +237,9 @@ public class MarketActivity extends AppCompatActivity implements NavigationView.
 
                         //Get the PRICE and CHANGEPCTDAY value and format it to 2 decimals
                         DecimalFormat df = new DecimalFormat("#.##");
-                        Double tempMarketValue = (Double.valueOf(df.format(coinObject.getJSONObject("USD").getDouble("PRICE"))));
-                        Double tempDailyPriceChange = (Double.valueOf(df.format(coinObject.getJSONObject("USD").getDouble("CHANGEPCT24HOUR"))));
-                        mMarketValue.add(String.valueOf(tempMarketValue));
+                        Double tempMarketValue = (Double.valueOf(df.format(coinObject.getJSONObject(prefCurrency).getDouble("PRICE"))));
+                        Double tempDailyPriceChange = (Double.valueOf(df.format(coinObject.getJSONObject(prefCurrency).getDouble("CHANGEPCT24HOUR"))));
+                        mMarketValue.add(String.valueOf(tempMarketValue).concat(" " + currencySymbol));
                         mDailyChange.add(String.valueOf(tempDailyPriceChange));
                     }
 
@@ -248,4 +280,25 @@ public class MarketActivity extends AppCompatActivity implements NavigationView.
             RequestQueueService.showProgressDialog(MarketActivity.this);
         }
     };
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        if (key.equals("pref_currency_key")) {
+            try {
+                String currency = settings.getString("pref_currency_key", "USD");
+                System.out.println("Currency " + currency);
+                getMarketPrices();
+                mMarketAdapter.notifyDataSetChanged();
+                recreate();
+            } catch (Exception e) {
+            }
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        PreferenceManager.getDefaultSharedPreferences(this).unregisterOnSharedPreferenceChangeListener(this);
+        super.onDestroy();
+    }
+
 }

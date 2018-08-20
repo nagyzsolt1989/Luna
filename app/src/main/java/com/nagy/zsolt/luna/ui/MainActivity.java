@@ -3,11 +3,17 @@ package com.nagy.zsolt.luna.ui;
 import android.app.DatePickerDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceActivity;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
-import android.util.Log;
+import android.support.v7.widget.DividerItemDecoration;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,10 +26,8 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -35,7 +39,6 @@ import com.nagy.zsolt.luna.data.api.RequestQueueService;
 import com.nagy.zsolt.luna.data.database.AppDatabase;
 import com.nagy.zsolt.luna.data.database.PortfolioEntry;
 import com.nagy.zsolt.luna.utils.PortfolioAdapter;
-import com.nagy.zsolt.luna.utils.SwipeDismissListViewTouchListener;
 
 import org.json.JSONObject;
 
@@ -50,12 +53,14 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
+import static android.support.v7.widget.RecyclerView.VERTICAL;
+
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, DatePickerDialog.OnDateSetListener {
+implements NavigationView.OnNavigationItemSelectedListener, DatePickerDialog.OnDateSetListener, PortfolioAdapter.ItemClickListener, SharedPreferences.OnSharedPreferenceChangeListener {
 
     @Nullable
-    @BindView(R.id.lv_portfolio)
-    ListView mPortfolioListView;
+    @BindView(R.id.rv_portfolio)
+    RecyclerView mPortfolioRecyclerView;
     @Nullable
     @BindView(R.id.toolbar)
     Toolbar mToolbar;
@@ -79,10 +84,14 @@ public class MainActivity extends AppCompatActivity
     Button mTransactionDate;
     private AppDatabase mDb;
     private PortfolioAdapter mPortfolioAdapter;
+    private RecyclerView.LayoutManager mLayoutManager;
     private ActionBarDrawerToggle toggle;
     private ArrayList<String> coin, amount, date, values;
-    List<PortfolioEntry> mPortfoioEntries;
+    private List<PortfolioEntry> mPortfoioEntries;
     private double mSumPortfolio;
+    private String prefCurrency;
+    private char currencySymbol;
+    private SharedPreferences settings;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,6 +100,14 @@ public class MainActivity extends AppCompatActivity
         ButterKnife.bind(this);
 
         mDb = AppDatabase.getsInstance(getApplicationContext());
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
+        prefCurrency = settings.getString("pref_currency_key", "USD");
+        if (prefCurrency.equals("USD")){
+            currencySymbol = '$';
+        }else if (prefCurrency.equals("EUR")){
+            currencySymbol = '€';
+        }
+
 
         initViews();
 
@@ -109,6 +126,17 @@ public class MainActivity extends AppCompatActivity
         toggle.syncState();
 
         navigationView.setNavigationItemSelectedListener(this);
+
+        // use this setting to improve performance if you know that changes
+        // in content do not change the layout size of the RecyclerView
+        mPortfolioRecyclerView.setHasFixedSize(true);
+
+        // use a linear layout manager
+        mLayoutManager = new LinearLayoutManager(this);
+        mPortfolioRecyclerView.setLayoutManager(mLayoutManager);
+
+        settings = PreferenceManager.getDefaultSharedPreferences(this);
+        settings.registerOnSharedPreferenceChangeListener(this);
 
         coin = new ArrayList<>();
         amount = new ArrayList<>();
@@ -131,45 +159,41 @@ public class MainActivity extends AppCompatActivity
         }
 
         if (coin.size() < 1) {
-            mPortfolioAdapter = new PortfolioAdapter(MainActivity.this, coin, amount, date, values);
+            mPortfolioAdapter = new PortfolioAdapter(MainActivity.this, this, values);
 
             // Assign adapter to ListView
-            mPortfolioListView.setAdapter(mPortfolioAdapter);
+            mPortfolioRecyclerView.setAdapter(mPortfolioAdapter);
+            retrievePortfolioEntries();
         }
 
+        DividerItemDecoration decoration = new DividerItemDecoration(getApplicationContext(), VERTICAL);
+        mPortfolioRecyclerView.addItemDecoration(decoration);
 
-        SwipeDismissListViewTouchListener touchListener =
-                new SwipeDismissListViewTouchListener(
-                        mPortfolioListView,
-                        new SwipeDismissListViewTouchListener.DismissCallbacks() {
-                            @Override
-                            public boolean canDismiss(int position) {
-                                return true;
-                            }
-
-                            @Override
-                            public void onDismiss(ListView listView, int[] reverseSortedPositions) {
-                                for (int position : reverseSortedPositions) {
-
-//                                    coin.remove(position);
-//                                    values.remove(position);
-//                                    PortfolioEntry portfolioEntry = new PortfolioEntry();
-
-                                    mDb.portfolioDao().deletePortfolio(mPortfolioAdapter.getItemId(position));
-                                    mPortfolioAdapter.notifyDataSetChanged();
-                                    calculateSumPortfolio();
-
-                                }
-
-                            }
-                        });
-        mPortfolioListView.setOnTouchListener(touchListener);
-        mPortfolioListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        /*
+         Add a touch helper to the RecyclerView to recognize when a user swipes to delete an item.
+         An ItemTouchHelper enables touch behavior (like swipe and move) on each ViewHolder,
+         and uses callbacks to signal when a user is performing these actions.
+         */
+        new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
             @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
-                launchDetailActivity(position);
+            public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
+                return false;
             }
-        });
+
+            // Called when a user swipes left or right on a ViewHolder
+            @Override
+            public void onSwiped(final RecyclerView.ViewHolder viewHolder, int swipeDir) {
+
+                int position = viewHolder.getAdapterPosition();
+                List<PortfolioEntry> portfolioEntries = mPortfolioAdapter.getPortfolioEntries();
+                mDb.portfolioDao().deletePortfolio(portfolioEntries.get(position));
+                values.remove(position);
+
+                retrievePortfolioEntries();
+                refreshPortfolioData();
+                calculateSumPortfolio();
+            }
+        }).attachToRecyclerView(mPortfolioRecyclerView);
     }
 
     @Override
@@ -245,6 +269,12 @@ public class MainActivity extends AppCompatActivity
         }
 
         return true;
+    }
+
+    private void retrievePortfolioEntries() {
+        mPortfoioEntries = mDb.portfolioDao().loadAllPortfolioEntries();
+        System.out.println("mPortfoioEntries" + mPortfoioEntries);
+        mPortfolioAdapter.setPortfolioEntries(mPortfoioEntries);
     }
 
     private void showTransactionDialog() {
@@ -332,7 +362,7 @@ public class MainActivity extends AppCompatActivity
         try {
             //Create Instance of GETAPIRequest and call it's
             //request() method
-            String url = "https://min-api.cryptocompare.com/data/price?fsym=" + coin + "&tsyms=BTC,USD,EUR";
+            String url = "https://min-api.cryptocompare.com/data/price?fsym=" + coin + "&tsyms=" + prefCurrency;
             System.out.println(url);
             GetAPIRequest getapiRequest = new GetAPIRequest();
             getapiRequest.request(this, fetchGetResultListener, url);
@@ -354,13 +384,13 @@ public class MainActivity extends AppCompatActivity
                 //Check result sent by our GETAPIRequest class
                 if (data != null) {
                     double amount = Double.parseDouble(mAmount.getText().toString());
-                    double price = data.getDouble("USD");
+                    double price = data.getDouble(prefCurrency);
                     System.out.println("The price " + price);
                     double value = amount * price;
                     DecimalFormat df = new DecimalFormat("#.##");
                     values.add(Double.toString(Double.valueOf(df.format(value))));
+                    retrievePortfolioEntries();
                     calculateSumPortfolio();
-                    mPortfolioAdapter.notifyDataSetChanged();
                 } else {
                     RequestQueueService.showAlert(getString(R.string.noDataAlert), MainActivity.this);
                 }
@@ -391,7 +421,7 @@ public class MainActivity extends AppCompatActivity
         try {
             //Create Instance of GETAPIRequest and call it's
             //request() method
-            String url = "https://min-api.cryptocompare.com/data/pricemulti?fsyms=" + coinString + "&tsyms=BTC,USD,EUR";
+            String url = "https://min-api.cryptocompare.com/data/pricemulti?fsyms=" + coinString + "&tsyms=" + prefCurrency;
             System.out.println(url);
             GetAPIRequest getapiRequest = new GetAPIRequest();
             getapiRequest.request(this, fetchGetPricesResultListener, url);
@@ -419,17 +449,19 @@ public class MainActivity extends AppCompatActivity
 
                         //Get the PRICE value and format it to 2 decimals
                         DecimalFormat df = new DecimalFormat("#.##");
-                        Double coinPrice = (Double.valueOf(df.format(coinObject.getDouble("USD"))));
+                        Double coinPrice = (Double.valueOf(df.format(coinObject.getDouble(prefCurrency))));
                         double value = Double.parseDouble(amount.get(i)) * coinPrice;
                         System.out.println(value);
                         values.add(Double.toString(Double.valueOf(df.format(value))));
                         i++;
                     }
 
-                    mPortfolioAdapter = new PortfolioAdapter(MainActivity.this, coin, amount, date, values);
+                    mPortfolioAdapter = new PortfolioAdapter(MainActivity.this, MainActivity.this, values);
 
                     // Assign adapter to ListView
-                    mPortfolioListView.setAdapter(mPortfolioAdapter);
+                    mPortfolioRecyclerView.setAdapter(mPortfolioAdapter);
+
+                    retrievePortfolioEntries();
 
                     calculateSumPortfolio();
 
@@ -470,14 +502,13 @@ public class MainActivity extends AppCompatActivity
 
         mSumPortfolioTV = findViewById(R.id.tv_portfolio_value);
 
-
         mSumPortfolio = 0.0;
         for (int i = 0; i < values.size(); i++) {
             mSumPortfolio += Double.parseDouble(values.get(i));
         }
         System.out.println("mSumPortfolio: " + mSumPortfolio);
         DecimalFormat df = new DecimalFormat("#.##");
-        mSumPortfolioTV.setText(Double.toString(Double.valueOf(df.format(mSumPortfolio))).concat(" $"));
+        mSumPortfolioTV.setText(Double.toString(Double.valueOf(df.format(mSumPortfolio))).concat(" " + currencySymbol));
     }
 
     @Override
@@ -485,5 +516,49 @@ public class MainActivity extends AppCompatActivity
 
         month++;
         mTransactionDate.setText(year + "." + month + "." + dayOfMonth);
+    }
+
+    @Override
+    public void onItemClickListener(int itemId) {
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        if (key.equals("pref_currency_key")) {
+            try {
+                String currency = settings.getString("pref_currency_key", "USD");
+                System.out.println("Currency " + currency);
+                refreshPortfolioData();
+
+                //Make a string from all of the coins
+                StringBuilder allCoins = new StringBuilder();
+                String prefix = "";
+                for (String s : coin) {
+                    allCoins.append(prefix);
+                    prefix = ",";
+                    allCoins.append(s);
+                }
+
+                if (coin.size() > 0) {
+                    updatePortfolioPrices(allCoins.toString());
+                }
+
+                if (coin.size() < 1) {
+                    mPortfolioAdapter = new PortfolioAdapter(MainActivity.this, this, values);
+
+                    // Assign adapter to ListView
+                    mPortfolioRecyclerView.setAdapter(mPortfolioAdapter);
+                    retrievePortfolioEntries();
+                }
+                recreate();
+            } catch (Exception e) {
+            }
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        PreferenceManager.getDefaultSharedPreferences(this).unregisterOnSharedPreferenceChangeListener(this);
+        super.onDestroy();
     }
 }

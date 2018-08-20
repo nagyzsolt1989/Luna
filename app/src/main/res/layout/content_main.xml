@@ -52,8 +52,8 @@
         android:layout_height="wrap_content"
         app:layout_constraintTop_toBottomOf="@id/tv_my_portfolio">
 
-        <ListView
-            android:id="@+id/lv_portfolio"
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/rv_portfolio"
             android:layout_width="match_parent"
             android:layout_height="250dp"
             android:layout_weight="1"/>
