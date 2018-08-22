@@ -43,7 +43,7 @@
         android:layout_marginEnd="8dp"
         android:gravity="right"
         android:padding="8dp"
-        android:text="0 $"
+        android:text="0"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/photo_container"/>
 

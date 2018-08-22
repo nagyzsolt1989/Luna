@@ -353,7 +353,7 @@ public class DetailActivity extends AppCompatActivity implements NavigationView.
                         mHighValue.setText(String.valueOf(tempHigh24Hour).concat(" " + currencySymbol));
                         mLowValue.setText(String.valueOf(tempLow24Hour).concat(" " + currencySymbol));
                         mAbsValue.setText(String.valueOf(tempChange24Hour).concat(" " + currencySymbol));
-                        mPctValue.setText(String.valueOf(tempChangePct24Hour).concat(" " + currencySymbol));
+                        mPctValue.setText(String.valueOf(tempChangePct24Hour).concat(" %"));
                         mVolumeValue.setText(String.valueOf(tempVolume24Hour).concat(" " + currencySymbol));
                     }
 
