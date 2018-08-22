@@ -22,6 +22,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.BounceInterpolator;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -37,10 +38,14 @@ import com.nagy.zsolt.luna.R;
 import com.nagy.zsolt.luna.data.api.FetchDataListener;
 import com.nagy.zsolt.luna.data.api.GetAPIRequest;
 import com.nagy.zsolt.luna.data.api.RequestQueueService;
+import com.squareup.picasso.Picasso;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -56,6 +61,8 @@ import static com.nagy.zsolt.luna.data.Constants.*;
 
 public class DetailActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, SharedPreferences.OnSharedPreferenceChangeListener{
 
+    @BindView(R.id.coin_image)
+    ImageView mCoinImage;
     @BindView(R.id.tv_crypto_currency)
     TextView mCurrencyName;
     @BindView(R.id.toolbar)
@@ -140,6 +147,11 @@ public class DetailActivity extends AppCompatActivity implements NavigationView.
 
         currencyName = intent.getStringExtra(EXTRA_CURRENCY);
         mCurrencyName.setText(currencyName);
+
+        if(currencyName != null){
+            String imageUrl = getImgURL(currencyName);
+            Picasso.get().load("https://www.cryptocompare.com/" + imageUrl).into(mCoinImage);
+        }
 
         getCoinDetails(currencyName);
         getChartData(currencyName);
@@ -484,5 +496,33 @@ public class DetailActivity extends AppCompatActivity implements NavigationView.
     public void onDestroy() {
         PreferenceManager.getDefaultSharedPreferences(this).unregisterOnSharedPreferenceChangeListener(this);
         super.onDestroy();
+    }
+
+    public String loadJSONFromAsset() {
+        String json = null;
+        try {
+            InputStream is = getAssets().open("coin.json");
+            int size = is.available();
+            byte[] buffer = new byte[size];
+            is.read(buffer);
+            is.close();
+            json = new String(buffer, "UTF-8");
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            return null;
+        }
+        return json;
+    }
+
+    public String getImgURL(String crypto) {
+        String imageUrl = null;
+        try {
+            JSONObject obj = new JSONObject(loadJSONFromAsset());
+            imageUrl = obj.getJSONObject(crypto).getString("ImageUrl");
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return null;
+        }
+        return imageUrl;
     }
 }

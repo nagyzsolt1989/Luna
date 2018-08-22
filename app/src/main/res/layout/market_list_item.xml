@@ -17,8 +17,8 @@
 
         <ImageView
             android:id="@+id/coin_image"
-            android:layout_width="50dip"
-            android:layout_height="50dip"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
             android:paddingTop="5dp"/>
 
     </FrameLayout>

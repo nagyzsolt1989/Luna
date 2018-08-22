@@ -29,6 +29,8 @@ import com.nagy.zsolt.luna.utils.MarketAdapter;
 
 import org.json.JSONObject;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -243,7 +245,7 @@ public class MarketActivity extends AppCompatActivity implements NavigationView.
                         mDailyChange.add(String.valueOf(tempDailyPriceChange));
                     }
 
-                    mMarketAdapter = new MarketAdapter(MarketActivity.this, coin, getResources().getStringArray(R.array.ic_coins), mDailyChange, mMarketValue);
+                    mMarketAdapter = new MarketAdapter(MarketActivity.this, coin, mDailyChange, mMarketValue);
 
                     // Assign adapter to ListView
                     mMarketListView.setAdapter(mMarketAdapter);

@@ -13,7 +13,13 @@ import android.widget.TextView;
 
 import com.nagy.zsolt.luna.R;
 import com.nagy.zsolt.luna.data.database.PortfolioEntry;
+import com.squareup.picasso.Picasso;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -69,12 +75,15 @@ public class PortfolioAdapter extends RecyclerView.Adapter<PortfolioAdapter.Port
         String amount = portfolioEntry.getAmount();
         String value = values.get(position);
         String trDate = portfolioEntry.getDate();
+        String imageUrl = getImgURL(coin);
+
 
         //Set values
         holder.tvCoin.setText(coin);
         holder.tvAmount.setText(amount);
         holder.tvValue.setText(value.concat(" " + currencySymbol));
         holder.tvTrDate.setText(trDate);
+        Picasso.get().load("https://www.cryptocompare.com/" + imageUrl).into(holder.ivCoin);
     }
 
     /**
@@ -107,6 +116,7 @@ public class PortfolioAdapter extends RecyclerView.Adapter<PortfolioAdapter.Port
 
     class PortfolioEntryViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
 
+        ImageView ivCoin;
         TextView tvCoin;
         TextView tvAmount;
         TextView tvValue;
@@ -115,6 +125,7 @@ public class PortfolioAdapter extends RecyclerView.Adapter<PortfolioAdapter.Port
         public PortfolioEntryViewHolder(View itemView) {
             super(itemView);
 
+            ivCoin = itemView.findViewById(R.id.coin_image);
             tvCoin = itemView.findViewById(R.id.coin);
             tvAmount = itemView.findViewById(R.id.amount);
             tvValue = itemView.findViewById(R.id.value);
@@ -127,5 +138,33 @@ public class PortfolioAdapter extends RecyclerView.Adapter<PortfolioAdapter.Port
             mItemClickListener.onItemClickListener(elementId);
         }
 
+    }
+
+    public String loadJSONFromAsset() {
+        String json = null;
+        try {
+            InputStream is = mContext.getAssets().open("coin.json");
+            int size = is.available();
+            byte[] buffer = new byte[size];
+            is.read(buffer);
+            is.close();
+            json = new String(buffer, "UTF-8");
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            return null;
+        }
+        return json;
+    }
+
+    public String getImgURL(String crypto) {
+        String imageUrl = null;
+        try {
+            JSONObject obj = new JSONObject(loadJSONFromAsset());
+            imageUrl = obj.getJSONObject(crypto).getString("ImageUrl");
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return null;
+        }
+        return imageUrl;
     }
 }
