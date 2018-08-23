@@ -6,6 +6,7 @@ import android.appwidget.AppWidgetManager;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.IBinder;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.RemoteViews;
 import android.widget.RemoteViewsService;
@@ -26,6 +27,7 @@ import java.util.Random;
 public class UpdateWidgetService extends Service {
     private static final String LOG = "de.vogella.android.widget.example";
     private int widgetIdToUse;
+    private char currencySymbol;
 
     @Override
     public void onStart(Intent intent, int startId) {
@@ -37,6 +39,16 @@ public class UpdateWidgetService extends Service {
 
         for (int widgetId : allWidgetIds) {
             widgetIdToUse = widgetId;
+            SharedPreferences mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+            String mSelectedCoin = mPrefs.getString("WIDGET_SELECTED_COIN", "coin was not in shared preferences");
+
+            final String prefCurrency = mPrefs.getString(getString(R.string.pref_currency_key), "USD");
+            if (prefCurrency.equals("USD")) {
+                currencySymbol = '$';
+            } else if (prefCurrency.equals("EUR")) {
+                currencySymbol = '€';
+            }
+
             // create some random data
             int number = (new Random().nextInt(100));
 
@@ -47,7 +59,7 @@ public class UpdateWidgetService extends Service {
             // Get the data from the rest service
             RequestQueue queue = Volley.newRequestQueue(this);
 
-            String url = "https://min-api.cryptocompare.com/data/price?fsym=ETH&tsyms=BTC";
+            String url = "https://min-api.cryptocompare.com/data/price?fsym=" + mSelectedCoin + "&tsyms=" + prefCurrency;
 
             JsonObjectRequest jsObjRequest = new JsonObjectRequest(
                     Request.Method.GET, url, null,
@@ -58,13 +70,8 @@ public class UpdateWidgetService extends Service {
                             Log.w("WidgetExample",
                                     "Response => " + response.toString());
                             // Set the text\
-                            try {
-                                remoteViews.setTextViewText(R.id.widget_coin_price,
-                                        response.getString("USD"));
-                            } catch (JSONException e) {
-                                // TODO Auto-generated catch block
-                                e.printStackTrace();
-                            }
+                            remoteViews.setTextViewText(R.id.widget_coin_price,
+                                    response.optString(prefCurrency));
                             appWidgetManager.updateAppWidget(widgetIdToUse, remoteViews);
                         }
                     }, new Response.ErrorListener() {

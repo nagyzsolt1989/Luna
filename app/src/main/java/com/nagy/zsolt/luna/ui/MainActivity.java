@@ -14,6 +14,7 @@ import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -26,11 +27,17 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.analytics.HitBuilders;
+import com.google.android.gms.analytics.Tracker;
 import com.nagy.zsolt.luna.R;
 import com.nagy.zsolt.luna.data.Constants;
 import com.nagy.zsolt.luna.data.api.FetchDataListener;
@@ -38,6 +45,7 @@ import com.nagy.zsolt.luna.data.api.GetAPIRequest;
 import com.nagy.zsolt.luna.data.api.RequestQueueService;
 import com.nagy.zsolt.luna.data.database.AppDatabase;
 import com.nagy.zsolt.luna.data.database.PortfolioEntry;
+import com.nagy.zsolt.luna.services.AnalyticsApplication;
 import com.nagy.zsolt.luna.utils.PortfolioAdapter;
 
 import org.json.JSONObject;
@@ -92,6 +100,8 @@ implements NavigationView.OnNavigationItemSelectedListener, DatePickerDialog.OnD
     private String prefCurrency;
     private char currencySymbol;
     private SharedPreferences settings;
+    private Tracker mTracker;
+    private AdView mAdView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -99,12 +109,23 @@ implements NavigationView.OnNavigationItemSelectedListener, DatePickerDialog.OnD
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
 
+        // Obtain the shared Tracker instance.
+        AnalyticsApplication application = (AnalyticsApplication) getApplication();
+        mTracker = application.getDefaultTracker();
+
+        // Initialize Admob
+        MobileAds.initialize(this, "ca-app-pub-8219404138834758~1167365723");
+
+        mAdView = findViewById(R.id.adView);
+        AdRequest adRequest = new AdRequest.Builder().build();
+        mAdView.loadAd(adRequest);
+
         mDb = AppDatabase.getsInstance(getApplicationContext());
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
-        prefCurrency = settings.getString("pref_currency_key", "USD");
-        if (prefCurrency.equals("USD")){
+        prefCurrency = settings.getString(getString(R.string.pref_currency_key), getString(R.string.currency_USD));
+        if (prefCurrency.equals(getString(R.string.currency_USD))){
             currencySymbol = '$';
-        }else if (prefCurrency.equals("EUR")){
+        }else if (prefCurrency.equals(getString(R.string.currency_EUR))){
             currencySymbol = '€';
         }
 
@@ -199,7 +220,10 @@ implements NavigationView.OnNavigationItemSelectedListener, DatePickerDialog.OnD
     @Override
     protected void onResume() {
         super.onResume();
-//        mPortfolioAdapter = new PortfolioAdapter(this, mDb.portfolioDao().loadAllCoins(), mDb.portfolioDao().loadAllAmounts(), mDb.portfolioDao().loadAllDates());
+        String name = "MainActivity";
+        Log.i("MainActivity", "Setting screen name: " + name);
+        mTracker.setScreenName("Image~" + name);
+        mTracker.send(new HitBuilders.ScreenViewBuilder().build());
     }
 
     @Override
@@ -273,7 +297,6 @@ implements NavigationView.OnNavigationItemSelectedListener, DatePickerDialog.OnD
 
     private void retrievePortfolioEntries() {
         mPortfoioEntries = mDb.portfolioDao().loadAllPortfolioEntries();
-        System.out.println("mPortfoioEntries" + mPortfoioEntries);
         mPortfolioAdapter.setPortfolioEntries(mPortfoioEntries);
     }
 
@@ -285,7 +308,7 @@ implements NavigationView.OnNavigationItemSelectedListener, DatePickerDialog.OnD
         AlertDialog.Builder db = new AlertDialog.Builder(this);
         ButterKnife.bind(this, mDialogView);
         db.setView(mDialogView);
-        db.setTitle("New Transaction");
+        db.setTitle(R.string.transacion_dialog_title);
 
         mTransactionDate.setShowSoftInputOnFocus(false);
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy.MM.dd");
@@ -302,14 +325,14 @@ implements NavigationView.OnNavigationItemSelectedListener, DatePickerDialog.OnD
             }
         });
 
-        db.setPositiveButton("OK", new DialogInterface.OnClickListener()
+        db.setPositiveButton(R.string.button_OK, new DialogInterface.OnClickListener()
 
         {
             public void onClick(DialogInterface dialog, int which) {
 
             }
         });
-        db.setNegativeButton("Cancel", new DialogInterface.OnClickListener()
+        db.setNegativeButton(R.string.button_Cancel, new DialogInterface.OnClickListener()
 
         {
             public void onClick(DialogInterface dialog, int id) {
@@ -322,12 +345,12 @@ implements NavigationView.OnNavigationItemSelectedListener, DatePickerDialog.OnD
             @Override
             public void onClick(View v) {
                 if (mAmount.getText().toString().length() == 0) {
-                    Snackbar snackbar = Snackbar.make(mDialogView, "Please add an amount for the transaction!", Snackbar.LENGTH_SHORT);
+                    Snackbar snackbar = Snackbar.make(mDialogView, R.string.warning_Amount, Snackbar.LENGTH_SHORT);
                     View snackBarView = snackbar.getView();
                     snackBarView.setBackgroundColor(getResources().getColor(R.color.colorSnackbar));
                     snackbar.show();
                 } else if (mTransactionDate.getText().toString().length() == 0) {
-                    Snackbar snackbar = Snackbar.make(mDialogView, "Please add a date for the transaction!", Snackbar.LENGTH_SHORT);
+                    Snackbar snackbar = Snackbar.make(mDialogView, R.string.warning_Date, Snackbar.LENGTH_SHORT);
                     View snackBarView = snackbar.getView();
                     snackBarView.setBackgroundColor(getResources().getColor(R.color.colorSnackbar));
                     snackbar.show();
@@ -362,8 +385,8 @@ implements NavigationView.OnNavigationItemSelectedListener, DatePickerDialog.OnD
         try {
             //Create Instance of GETAPIRequest and call it's
             //request() method
-            String url = "https://min-api.cryptocompare.com/data/price?fsym=" + coin + "&tsyms=" + prefCurrency;
-            System.out.println(url);
+            String url = getString(R.string.cc_price_prefix) + coin + getString(R.string.cc_tsysms) + prefCurrency;
+
             GetAPIRequest getapiRequest = new GetAPIRequest();
             getapiRequest.request(this, fetchGetResultListener, url);
 //            Toast.makeText(getContext(), "GET API called", Toast.LENGTH_SHORT).show();
@@ -384,8 +407,8 @@ implements NavigationView.OnNavigationItemSelectedListener, DatePickerDialog.OnD
                 //Check result sent by our GETAPIRequest class
                 if (data != null) {
                     double amount = Double.parseDouble(mAmount.getText().toString());
-                    double price = data.getDouble(prefCurrency);
-                    System.out.println("The price " + price);
+                    double price = data.optDouble(prefCurrency);
+
                     double value = amount * price;
                     DecimalFormat df = new DecimalFormat("#.##");
                     values.add(Double.toString(Double.valueOf(df.format(value))));
@@ -421,8 +444,8 @@ implements NavigationView.OnNavigationItemSelectedListener, DatePickerDialog.OnD
         try {
             //Create Instance of GETAPIRequest and call it's
             //request() method
-            String url = "https://min-api.cryptocompare.com/data/pricemulti?fsyms=" + coinString + "&tsyms=" + prefCurrency;
-            System.out.println(url);
+            String url = getString(R.string.cc_pricemutli_prefix) + coinString + getString(R.string.cc_tsysms) + prefCurrency;
+
             GetAPIRequest getapiRequest = new GetAPIRequest();
             getapiRequest.request(this, fetchGetPricesResultListener, url);
         } catch (Exception e) {
@@ -445,13 +468,13 @@ implements NavigationView.OnNavigationItemSelectedListener, DatePickerDialog.OnD
                     int i = 0;
                     while (keysItr.hasNext()) {
                         String key = keysItr.next();
-                        JSONObject coinObject = data.getJSONObject(key);
+                        JSONObject coinObject = data.optJSONObject(key);
 
                         //Get the PRICE value and format it to 2 decimals
                         DecimalFormat df = new DecimalFormat("#.##");
-                        Double coinPrice = (Double.valueOf(df.format(coinObject.getDouble(prefCurrency))));
+                        Double coinPrice = (Double.valueOf(df.format(coinObject.optDouble(prefCurrency))));
                         double value = Double.parseDouble(amount.get(i)) * coinPrice;
-                        System.out.println(value);
+
                         values.add(Double.toString(Double.valueOf(df.format(value))));
                         i++;
                     }
@@ -506,7 +529,7 @@ implements NavigationView.OnNavigationItemSelectedListener, DatePickerDialog.OnD
         for (int i = 0; i < values.size(); i++) {
             mSumPortfolio += Double.parseDouble(values.get(i));
         }
-        System.out.println("mSumPortfolio: " + mSumPortfolio);
+
         DecimalFormat df = new DecimalFormat("#.##");
         mSumPortfolioTV.setText(Double.toString(Double.valueOf(df.format(mSumPortfolio))).concat(" " + currencySymbol));
     }
@@ -524,10 +547,9 @@ implements NavigationView.OnNavigationItemSelectedListener, DatePickerDialog.OnD
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        if (key.equals("pref_currency_key")) {
+        if (key.equals(getString(R.string.pref_currency_key))) {
             try {
                 String currency = settings.getString("pref_currency_key", "USD");
-                System.out.println("Currency " + currency);
                 refreshPortfolioData();
 
                 //Make a string from all of the coins

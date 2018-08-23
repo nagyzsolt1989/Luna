@@ -11,11 +11,11 @@
     <ImageView
         android:id="@+id/imageView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:paddingTop="?attr/actionBarSize"
-        android:background="@drawable/moon"
+        android:layout_height="205dp"
         android:contentDescription="@string/nav_header_desc"
-        android:scaleType="centerCrop"/>
+        android:paddingTop="?attr/actionBarSize"
+        android:scaleType="centerCrop"
+        android:src="@drawable/moon"/>
 
     <TextView
         android:layout_width="match_parent"

@@ -83,9 +83,7 @@ public class AppWidgetConfigureActivity extends AppCompatActivity {
                     intent.setAction("android.appwidget.action.APPWIDGET_UPDATE");
                     int ids[] = AppWidgetManager.getInstance(
                             getApplication()).getAppWidgetIds(new ComponentName(getApplication(), WidgetProvider.class));
-                    for (int i = 0; i < ids.length; i++) {
-                        System.out.println("Ids " + ids[i]);
-                    }
+
                     intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids);
 
                     prefsEditor.putString("WIDGET_SELECTED_COIN", mCurrencySpinner.getSelectedItem().toString());
@@ -95,9 +93,7 @@ public class AppWidgetConfigureActivity extends AppCompatActivity {
 
                     int appWidgetIds[] = appWidgetManager.getAppWidgetIds(
                             new ComponentName(AppWidgetConfigureActivity.this, WidgetProvider.class));
-                    for (int i = 0; i < appWidgetIds.length; i++) {
-                        System.out.println("appWidgetIds " + appWidgetIds[i]);
-                    }
+
                     appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetIds, R.id.widget_listview);
                     setResult(RESULT_OK, intent);
                     finish();

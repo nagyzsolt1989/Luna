@@ -17,6 +17,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -34,10 +35,13 @@ import com.db.chart.renderer.XRenderer;
 import com.db.chart.tooltip.Tooltip;
 import com.db.chart.util.Tools;
 import com.db.chart.view.LineChartView;
+import com.google.android.gms.analytics.HitBuilders;
+import com.google.android.gms.analytics.Tracker;
 import com.nagy.zsolt.luna.R;
 import com.nagy.zsolt.luna.data.api.FetchDataListener;
 import com.nagy.zsolt.luna.data.api.GetAPIRequest;
 import com.nagy.zsolt.luna.data.api.RequestQueueService;
+import com.nagy.zsolt.luna.services.AnalyticsApplication;
 import com.squareup.picasso.Picasso;
 
 import org.json.JSONArray;
@@ -90,7 +94,7 @@ public class DetailActivity extends AppCompatActivity implements NavigationView.
     private String prefCurrency, currencyName;
     private char currencySymbol;
     private SharedPreferences settings;
-
+    private Tracker mTracker;
     private Context mContext;
 
     private final String[] mXLabels = new String[8];
@@ -109,6 +113,10 @@ public class DetailActivity extends AppCompatActivity implements NavigationView.
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
         ButterKnife.bind(this);
+
+        // Obtain the shared Tracker instance.
+        AnalyticsApplication application = (AnalyticsApplication) getApplication();
+        mTracker = application.getDefaultTracker();
 
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
@@ -183,10 +191,6 @@ public class DetailActivity extends AppCompatActivity implements NavigationView.
         mContext = getApplicationContext();
 
         mChart = (LineChartView) findViewById(R.id.chart);
-
-        for (int i = 0; i < mValues[0].length; i++) {
-            System.out.println("mValues " + mValues[0][i]);
-        }
 
         // Tooltip
         mTip = new Tooltip(mContext, R.layout.linechart_tooltip, R.id.value);
@@ -342,24 +346,23 @@ public class DetailActivity extends AppCompatActivity implements NavigationView.
             try {
                 //Check result sent by our GETAPIRequest class
                 if (data != null) {
-                    System.out.println(data);
-                    coinDetails = data.getJSONObject("RAW");
+                    coinDetails = data.optJSONObject("RAW");
 
                     Iterator<String> keysItr = coinDetails.keys();
 
                     //Iterating over the JSON and save values
                     while (keysItr.hasNext()) {
                         String key = keysItr.next();
-                        JSONObject coinObject = coinDetails.getJSONObject(key);
+                        JSONObject coinObject = coinDetails.optJSONObject(key);
 
                         //Get the values from the JSON
                         DecimalFormat df = new DecimalFormat("#.##");
-                        Double tempMarketPrice = (Double.valueOf(df.format(coinObject.getJSONObject(prefCurrency).getDouble("PRICE"))));
-                        Double tempLow24Hour = (Double.valueOf(df.format(coinObject.getJSONObject(prefCurrency).getDouble("LOW24HOUR"))));
-                        Double tempHigh24Hour = (Double.valueOf(df.format(coinObject.getJSONObject(prefCurrency).getDouble("HIGH24HOUR"))));
-                        Double tempChange24Hour = (Double.valueOf(df.format(coinObject.getJSONObject(prefCurrency).getDouble("CHANGE24HOUR"))));
-                        Double tempChangePct24Hour = (Double.valueOf(df.format(coinObject.getJSONObject(prefCurrency).getDouble("CHANGEPCT24HOUR"))));
-                        Double tempVolume24Hour = (Double.valueOf(df.format(coinObject.getJSONObject(prefCurrency).getDouble("VOLUME24HOUR"))));
+                        Double tempMarketPrice = (Double.valueOf(df.format(coinObject.optJSONObject(prefCurrency).optDouble("PRICE"))));
+                        Double tempLow24Hour = (Double.valueOf(df.format(coinObject.optJSONObject(prefCurrency).optDouble("LOW24HOUR"))));
+                        Double tempHigh24Hour = (Double.valueOf(df.format(coinObject.optJSONObject(prefCurrency).optDouble("HIGH24HOUR"))));
+                        Double tempChange24Hour = (Double.valueOf(df.format(coinObject.optJSONObject(prefCurrency).optDouble("CHANGE24HOUR"))));
+                        Double tempChangePct24Hour = (Double.valueOf(df.format(coinObject.optJSONObject(prefCurrency).optDouble("CHANGEPCT24HOUR"))));
+                        Double tempVolume24Hour = (Double.valueOf(df.format(coinObject.optJSONObject(prefCurrency).optDouble("VOLUME24HOUR"))));
 
                         mLastValue.setText(String.valueOf(tempMarketPrice).concat(" " + currencySymbol));
                         mHighValue.setText(String.valueOf(tempHigh24Hour).concat(" " + currencySymbol));
@@ -421,31 +424,23 @@ public class DetailActivity extends AppCompatActivity implements NavigationView.
             try {
                 //Check result sent by our GETAPIRequest class
                 if (data != null) {
-                    System.out.println(data);
-                    chartDetails = data.getJSONArray("Data");
+                    chartDetails = data.optJSONArray("Data");
 
-                    System.out.println("Chart Details: " + chartDetails);
                     //Iterating over the JSON and save values
                     for (int i = 0; i < chartDetails.length(); i++) {
 
-                        JSONObject chartData = chartDetails.getJSONObject(i);
+                        JSONObject chartData = chartDetails.optJSONObject(i);
 
                         //Get the values from the JSON
                         DecimalFormat df = new DecimalFormat("#.##");
-                        Float tempCloseValue = (Float.valueOf(df.format(chartData.getDouble("close"))));
-                        Long tempTime = (Long.valueOf(df.format(chartData.getDouble("time"))));
-//
-//                        System.out.println("Close value " + tempCloseValue);
-//                        System.out.println("Time " + tempTime);
+                        Float tempCloseValue = (Float.valueOf(df.format(chartData.optDouble("close"))));
+                        Long tempTime = (Long.valueOf(df.format(chartData.optDouble("time"))));
 
                         Calendar myDate = Calendar.getInstance();
                         myDate.setTimeInMillis(tempTime*1000);
 
                         int month = myDate.get(Calendar.MONTH);
                         month++;
-
-                        System.out.println("Date " + (month < 10 ? "0" : "") + month + "." + myDate.get(Calendar.DAY_OF_MONTH));
-                        System.out.println("Value " + tempCloseValue);
 
                         mXLabels[i] = String.valueOf((month < 10 ? "0" : "") + month + "." + myDate.get(Calendar.DAY_OF_MONTH));
                         mValues[0][i] = tempCloseValue;
@@ -485,7 +480,6 @@ public class DetailActivity extends AppCompatActivity implements NavigationView.
         if (key.equals("pref_currency_key")) {
             try {
                 String currency = settings.getString("pref_currency_key", "USD");
-                System.out.println("Currency " + currency);
                 recreate();
             } catch (Exception e) {
             }
@@ -496,6 +490,15 @@ public class DetailActivity extends AppCompatActivity implements NavigationView.
     public void onDestroy() {
         PreferenceManager.getDefaultSharedPreferences(this).unregisterOnSharedPreferenceChangeListener(this);
         super.onDestroy();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        String name = "DetailActivity";
+        Log.i("DetailActivity", "Setting screen name: " + name);
+        mTracker.setScreenName("Image~" + name);
+        mTracker.send(new HitBuilders.ScreenViewBuilder().build());
     }
 
     public String loadJSONFromAsset() {
@@ -518,7 +521,7 @@ public class DetailActivity extends AppCompatActivity implements NavigationView.
         String imageUrl = null;
         try {
             JSONObject obj = new JSONObject(loadJSONFromAsset());
-            imageUrl = obj.getJSONObject(crypto).getString("ImageUrl");
+            imageUrl = obj.optJSONObject(crypto).optString("ImageUrl");
         } catch (JSONException e) {
             e.printStackTrace();
             return null;

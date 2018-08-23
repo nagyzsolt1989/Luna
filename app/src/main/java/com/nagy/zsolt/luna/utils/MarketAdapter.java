@@ -104,7 +104,7 @@ public class MarketAdapter extends BaseAdapter {
         String imageUrl = null;
         try {
             JSONObject obj = new JSONObject(loadJSONFromAsset());
-            imageUrl = obj.getJSONObject(crypto).getString("ImageUrl");
+            imageUrl = obj.optJSONObject(crypto).getString("ImageUrl");
         } catch (JSONException e) {
             e.printStackTrace();
             return null;

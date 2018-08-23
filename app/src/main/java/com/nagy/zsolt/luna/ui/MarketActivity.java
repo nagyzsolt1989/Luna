@@ -20,11 +20,14 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import com.google.android.gms.analytics.HitBuilders;
+import com.google.android.gms.analytics.Tracker;
 import com.nagy.zsolt.luna.R;
 import com.nagy.zsolt.luna.data.Constants;
 import com.nagy.zsolt.luna.data.api.FetchDataListener;
 import com.nagy.zsolt.luna.data.api.GetAPIRequest;
 import com.nagy.zsolt.luna.data.api.RequestQueueService;
+import com.nagy.zsolt.luna.services.AnalyticsApplication;
 import com.nagy.zsolt.luna.utils.MarketAdapter;
 
 import org.json.JSONObject;
@@ -61,12 +64,17 @@ public class MarketActivity extends AppCompatActivity implements NavigationView.
     private char currencySymbol;
     ArrayList<String> coin, mDailyChange, mMarketValue;
     private SharedPreferences settings;
+    private Tracker mTracker;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_market);
         ButterKnife.bind(this);
+
+        // Obtain the shared Tracker instance.
+        AnalyticsApplication application = (AnalyticsApplication) getApplication();
+        mTracker = application.getDefaultTracker();
 
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
@@ -207,7 +215,7 @@ public class MarketActivity extends AppCompatActivity implements NavigationView.
             //Create Instance of GETAPIRequest and call it's
             //request() method
             String url = "https://min-api.cryptocompare.com/data/pricemultifull?fsyms=BTC,ETH,XRP,BCH,EOS,XLM,LTC,ADA,USDT,BNB,ETC,TRX,XMR,NEO,DASH&tsyms=" + prefCurrency;
-            System.out.println(url);
+
             GetAPIRequest getapiRequest = new GetAPIRequest();
             getapiRequest.request(this, fetchGetResultListener, url);
 //            Toast.makeText(getContext(), "GET API called", Toast.LENGTH_SHORT).show();
@@ -227,20 +235,20 @@ public class MarketActivity extends AppCompatActivity implements NavigationView.
             try {
                 //Check result sent by our GETAPIRequest class
                 if (data != null) {
-//                    System.out.println(data);
-                    marketPrices = data.getJSONObject("RAW");
+
+                    marketPrices = data.optJSONObject("RAW");
 
                     Iterator<String> keysItr = marketPrices.keys();
 
                     //Iterating over the JSON and save values
                     while (keysItr.hasNext()) {
                         String key = keysItr.next();
-                        JSONObject coinObject = marketPrices.getJSONObject(key);
+                        JSONObject coinObject = marketPrices.optJSONObject(key);
 
                         //Get the PRICE and CHANGEPCTDAY value and format it to 2 decimals
                         DecimalFormat df = new DecimalFormat("#.##");
-                        Double tempMarketValue = (Double.valueOf(df.format(coinObject.getJSONObject(prefCurrency).getDouble("PRICE"))));
-                        Double tempDailyPriceChange = (Double.valueOf(df.format(coinObject.getJSONObject(prefCurrency).getDouble("CHANGEPCT24HOUR"))));
+                        Double tempMarketValue = (Double.valueOf(df.format(coinObject.optJSONObject(prefCurrency).optDouble("PRICE"))));
+                        Double tempDailyPriceChange = (Double.valueOf(df.format(coinObject.optJSONObject(prefCurrency).optDouble("CHANGEPCT24HOUR"))));
                         mMarketValue.add(String.valueOf(tempMarketValue).concat(" " + currencySymbol));
                         mDailyChange.add(String.valueOf(tempDailyPriceChange));
                     }
@@ -288,7 +296,7 @@ public class MarketActivity extends AppCompatActivity implements NavigationView.
         if (key.equals("pref_currency_key")) {
             try {
                 String currency = settings.getString("pref_currency_key", "USD");
-                System.out.println("Currency " + currency);
+
                 getMarketPrices();
                 mMarketAdapter.notifyDataSetChanged();
                 recreate();
@@ -301,6 +309,15 @@ public class MarketActivity extends AppCompatActivity implements NavigationView.
     public void onDestroy() {
         PreferenceManager.getDefaultSharedPreferences(this).unregisterOnSharedPreferenceChangeListener(this);
         super.onDestroy();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        String name = "MarketActivity";
+        Log.i("MarketActivity", "Setting screen name: " + name);
+        mTracker.setScreenName("Image~" + name);
+        mTracker.send(new HitBuilders.ScreenViewBuilder().build());
     }
 
 }

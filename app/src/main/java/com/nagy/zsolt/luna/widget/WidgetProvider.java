@@ -60,8 +60,6 @@ public class WidgetProvider extends AppWidgetProvider {
 
             String url = "https://min-api.cryptocompare.com/data/price?fsym=" + mSelectedCoin + "&tsyms=" + prefCurrency;
 
-            System.out.println("Ez az URL" + url);
-
             JsonObjectRequest jsObjRequest = new JsonObjectRequest(
                     Request.Method.GET, url, null,
                     new Response.Listener<JSONObject>() {

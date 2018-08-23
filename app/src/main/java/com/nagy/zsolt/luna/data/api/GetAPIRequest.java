@@ -31,7 +31,7 @@ public class GetAPIRequest {
                                     //received response
                                     //call onFetchComplete of the listener
                                     listener.onFetchComplete(response);
-                                } else if (response.getString("Response") == "Error") {
+                                } else if (response.getString("Response").equals("Error")) {
                                     //has error in response
                                     //call onFetchFailure of the listener
                                     listener.onFetchFailure(response.getString("error"));
