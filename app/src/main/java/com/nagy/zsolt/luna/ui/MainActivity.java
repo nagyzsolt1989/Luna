@@ -64,7 +64,7 @@ import butterknife.ButterKnife;
 import static android.support.v7.widget.RecyclerView.VERTICAL;
 
 public class MainActivity extends AppCompatActivity
-implements NavigationView.OnNavigationItemSelectedListener, DatePickerDialog.OnDateSetListener, PortfolioAdapter.ItemClickListener, SharedPreferences.OnSharedPreferenceChangeListener {
+        implements NavigationView.OnNavigationItemSelectedListener, DatePickerDialog.OnDateSetListener, PortfolioAdapter.ItemClickListener, SharedPreferences.OnSharedPreferenceChangeListener {
 
     @Nullable
     @BindView(R.id.rv_portfolio)
@@ -123,9 +123,9 @@ implements NavigationView.OnNavigationItemSelectedListener, DatePickerDialog.OnD
         mDb = AppDatabase.getsInstance(getApplicationContext());
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
         prefCurrency = settings.getString(getString(R.string.pref_currency_key), getString(R.string.currency_USD));
-        if (prefCurrency.equals(getString(R.string.currency_USD))){
+        if (prefCurrency.equals(getString(R.string.currency_USD))) {
             currencySymbol = '$';
-        }else if (prefCurrency.equals(getString(R.string.currency_EUR))){
+        } else if (prefCurrency.equals(getString(R.string.currency_EUR))) {
             currencySymbol = '€';
         }
 
@@ -380,20 +380,27 @@ implements NavigationView.OnNavigationItemSelectedListener, DatePickerDialog.OnD
         date.addAll(mDb.portfolioDao().loadAllDates());
     }
 
-    public void getCoinPrice(String coin) {
+    public void getCoinPrice(final String coin) {
 
-        try {
-            //Create Instance of GETAPIRequest and call it's
-            //request() method
-            String url = getString(R.string.cc_price_prefix) + coin + getString(R.string.cc_tsysms) + prefCurrency;
+        new android.os.AsyncTask<Void, Void, Void>() {
 
-            GetAPIRequest getapiRequest = new GetAPIRequest();
-            getapiRequest.request(this, fetchGetResultListener, url);
+            @Override
+            protected Void doInBackground(Void... params) {
+                try {
+                    //Create Instance of GETAPIRequest and call it's
+                    //request() method
+                    String url = getString(R.string.cc_price_prefix) + coin + getString(R.string.cc_tsysms) + prefCurrency;
+
+                    GetAPIRequest getapiRequest = new GetAPIRequest();
+                    getapiRequest.request(MainActivity.this, fetchGetResultListener, url);
 //            Toast.makeText(getContext(), "GET API called", Toast.LENGTH_SHORT).show();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
 
+                return null;
+            }
+        }.executeOnExecutor(android.os.AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     //Implementing interfaces of FetchDataListener for GET api request
@@ -439,18 +446,31 @@ implements NavigationView.OnNavigationItemSelectedListener, DatePickerDialog.OnD
         }
     };
 
-    public void updatePortfolioPrices(String coinString) {
+    public void updatePortfolioPrices(final String coinString) {
 
-        try {
-            //Create Instance of GETAPIRequest and call it's
-            //request() method
-            String url = getString(R.string.cc_pricemutli_prefix) + coinString + getString(R.string.cc_tsysms) + prefCurrency;
+        new android.os.AsyncTask<Void, Void, Void>() {
 
-            GetAPIRequest getapiRequest = new GetAPIRequest();
-            getapiRequest.request(this, fetchGetPricesResultListener, url);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+            @Override
+            protected Void doInBackground(Void... params) {
+                try
+
+                {
+                    //Create Instance of GETAPIRequest and call it's
+                    //request() method
+                    String url = getString(R.string.cc_pricemutli_prefix) + coinString + getString(R.string.cc_tsysms) + prefCurrency;
+
+                    GetAPIRequest getapiRequest = new GetAPIRequest();
+                    getapiRequest.request(MainActivity.this, fetchGetPricesResultListener, url);
+                } catch (
+                        Exception e)
+
+                {
+                    e.printStackTrace();
+                }
+
+                return null;
+            }
+        }.executeOnExecutor(android.os.AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     FetchDataListener fetchGetPricesResultListener = new FetchDataListener() {

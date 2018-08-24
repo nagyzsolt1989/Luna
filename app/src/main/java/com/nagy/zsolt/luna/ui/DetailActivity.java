@@ -63,7 +63,7 @@ import butterknife.ButterKnife;
 
 import static com.nagy.zsolt.luna.data.Constants.*;
 
-public class DetailActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, SharedPreferences.OnSharedPreferenceChangeListener{
+public class DetailActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, SharedPreferences.OnSharedPreferenceChangeListener {
 
     @BindView(R.id.coin_image)
     ImageView mCoinImage;
@@ -146,9 +146,9 @@ public class DetailActivity extends AppCompatActivity implements NavigationView.
         settings = PreferenceManager.getDefaultSharedPreferences(this);
         settings.registerOnSharedPreferenceChangeListener(this);
         prefCurrency = settings.getString("pref_currency_key", "USD");
-        if (prefCurrency.equals("USD")){
+        if (prefCurrency.equals("USD")) {
             currencySymbol = '$';
-        }else if (prefCurrency.equals("EUR")){
+        } else if (prefCurrency.equals("EUR")) {
             currencySymbol = '€';
         }
 
@@ -156,7 +156,7 @@ public class DetailActivity extends AppCompatActivity implements NavigationView.
         currencyName = intent.getStringExtra(EXTRA_CURRENCY);
         mCurrencyName.setText(currencyName);
 
-        if(currencyName != null){
+        if (currencyName != null) {
             String imageUrl = getImgURL(currencyName);
             Picasso.get().load("https://www.cryptocompare.com/" + imageUrl).into(mCoinImage);
         }
@@ -245,7 +245,7 @@ public class DetailActivity extends AppCompatActivity implements NavigationView.
         //Normalize Y axis
         float min = getMinValue(mValues[0]);
         float max = getMaxValue(mValues[0]);
-        mChart.setAxisBorderValues(min-(min/10), max+(max/10))
+        mChart.setAxisBorderValues(min - (min / 10), max + (max / 10))
                 .setYLabels(AxisRenderer.LabelPosition.NONE)
                 .setTooltips(mTip)
                 .show(new Animation().setInterpolator(new BounceInterpolator())
@@ -321,19 +321,26 @@ public class DetailActivity extends AppCompatActivity implements NavigationView.
         return true;
     }
 
-    public void getCoinDetails(String coin) {
+    public void getCoinDetails(final String coin) {
 
-        try {
-            //Create Instance of GETAPIRequest and call it's
-            //request() method
-            String url = "https://min-api.cryptocompare.com/data/pricemultifull?fsyms=" + coin + "&tsyms=" + prefCurrency;
-            System.out.println(url);
-            GetAPIRequest getapiRequest = new GetAPIRequest();
-            getapiRequest.request(this, fetchGetResultListener, url);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        new android.os.AsyncTask<Void, Void, Void>() {
 
+            @Override
+            protected Void doInBackground(Void... params) {
+                try {
+                    //Create Instance of GETAPIRequest and call it's
+                    //request() method
+                    String url = "https://min-api.cryptocompare.com/data/pricemultifull?fsyms=" + coin + "&tsyms=" + prefCurrency;
+                    System.out.println(url);
+                    GetAPIRequest getapiRequest = new GetAPIRequest();
+                    getapiRequest.request(DetailActivity.this, fetchGetResultListener, url);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+                return null;
+            }
+        }.executeOnExecutor(android.os.AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     //Implementing interfaces of FetchDataListener for GET api request
@@ -373,7 +380,6 @@ public class DetailActivity extends AppCompatActivity implements NavigationView.
                     }
 
 
-
                 } else {
                     RequestQueueService.showAlert(getString(R.string.noDataAlert), DetailActivity.this);
                 }
@@ -399,19 +405,27 @@ public class DetailActivity extends AppCompatActivity implements NavigationView.
         }
     };
 
-    public void getChartData(String coin) {
+    public void getChartData(final String coin) {
 
-        try {
-            //Create Instance of GETAPIRequest and call it's
-            //request() method
-            String url = "https://min-api.cryptocompare.com/data/histoday?fsym=" + coin + "&tsym=" + prefCurrency + "&limit=7&aggregate=1";
-            System.out.println(url);
-            GetAPIRequest getapiRequest = new GetAPIRequest();
-            getapiRequest.request(this, fetchGetChartResultListener, url);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        new android.os.AsyncTask<Void, Void, Void>() {
 
+            @Override
+            protected Void doInBackground(Void... params) {
+
+                try {
+                    //Create Instance of GETAPIRequest and call it's
+                    //request() method
+                    String url = "https://min-api.cryptocompare.com/data/histoday?fsym=" + coin + "&tsym=" + prefCurrency + "&limit=7&aggregate=1";
+                    System.out.println(url);
+                    GetAPIRequest getapiRequest = new GetAPIRequest();
+                    getapiRequest.request(DetailActivity.this, fetchGetChartResultListener, url);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+                return null;
+            }
+        }.executeOnExecutor(android.os.AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     //Implementing interfaces of FetchDataListener for GET api request
@@ -437,7 +451,7 @@ public class DetailActivity extends AppCompatActivity implements NavigationView.
                         Long tempTime = (Long.valueOf(df.format(chartData.optDouble("time"))));
 
                         Calendar myDate = Calendar.getInstance();
-                        myDate.setTimeInMillis(tempTime*1000);
+                        myDate.setTimeInMillis(tempTime * 1000);
 
                         int month = myDate.get(Calendar.MONTH);
                         month++;
@@ -447,7 +461,6 @@ public class DetailActivity extends AppCompatActivity implements NavigationView.
                     }
 
                     drawChart();
-
 
 
                 } else {

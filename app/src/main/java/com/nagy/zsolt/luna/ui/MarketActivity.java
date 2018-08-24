@@ -211,18 +211,25 @@ public class MarketActivity extends AppCompatActivity implements NavigationView.
 
     public void getMarketPrices() {
 
-        try {
-            //Create Instance of GETAPIRequest and call it's
-            //request() method
-            String url = "https://min-api.cryptocompare.com/data/pricemultifull?fsyms=BTC,ETH,XRP,BCH,EOS,XLM,LTC,ADA,USDT,BNB,ETC,TRX,XMR,NEO,DASH&tsyms=" + prefCurrency;
+        new android.os.AsyncTask<Void, Void, Void>() {
 
-            GetAPIRequest getapiRequest = new GetAPIRequest();
-            getapiRequest.request(this, fetchGetResultListener, url);
+            @Override
+            protected Void doInBackground(Void... params) {
+                try {
+                    //Create Instance of GETAPIRequest and call it's
+                    //request() method
+                    String url = "https://min-api.cryptocompare.com/data/pricemultifull?fsyms=BTC,ETH,XRP,BCH,EOS,XLM,LTC,ADA,USDT,BNB,ETC,TRX,XMR,NEO,DASH&tsyms=" + prefCurrency;
+
+                    GetAPIRequest getapiRequest = new GetAPIRequest();
+                    getapiRequest.request(MarketActivity.this, fetchGetResultListener, url);
 //            Toast.makeText(getContext(), "GET API called", Toast.LENGTH_SHORT).show();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
 
+                return null;
+            }
+        }.executeOnExecutor(android.os.AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     //Implementing interfaces of FetchDataListener for GET api request

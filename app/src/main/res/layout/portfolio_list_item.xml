@@ -19,7 +19,8 @@
         <ImageView
             android:id="@+id/coin_image"
             android:layout_width="40dp"
-            android:layout_height="40dp"/>
+            android:layout_height="40dp"
+            android:contentDescription="@string/coin_image"/>
 
     </LinearLayout>
 
@@ -29,7 +30,7 @@
         android:layout_height="wrap_content"
         android:layout_alignTop="@+id/thumbnail"
         android:layout_toRightOf="@+id/thumbnail"
-        android:text="BTC"
+        android:text="@string/btc"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1"
         android:textSize="20sp"
         android:textStyle="bold"
@@ -42,7 +43,7 @@
         android:layout_below="@id/coin"
         android:layout_marginTop="1dip"
         android:layout_toRightOf="@+id/thumbnail"
-        android:text="2017.10.10"
+        android:text="@string/_2017_10_10"
         android:textSize="16sp"/>
 
     <LinearLayout
@@ -60,7 +61,7 @@
             android:gravity="center"
             android:paddingLeft="20dp"
             android:paddingTop="16dp"
-            android:text="0.35"
+            android:text="@string/_0_36"
             android:textSize="16sp"/>
 
     </LinearLayout>
@@ -77,7 +78,7 @@
             android:id="@+id/value"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="1000"
+            android:text="@string/_1000"
             android:textSize="20sp"
             app:layout_constraintTop_toTopOf="parent"/>
 

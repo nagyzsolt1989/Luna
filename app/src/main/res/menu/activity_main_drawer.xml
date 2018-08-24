@@ -7,15 +7,15 @@
         <item
             android:id="@+id/nav_gallery"
             android:icon="@drawable/ic_menu_gallery"
-            android:title="My Portfolio"/>
+            android:title="@string/my_portfolio"/>
         <item
             android:id="@+id/nav_slideshow"
             android:icon="@drawable/ic_menu_slideshow"
-            android:title="Market"/>
+            android:title="@string/market"/>
         <item
             android:id="@+id/nav_manage"
             android:icon="@drawable/ic_menu_manage"
-            android:title="Settings"/>
+            android:title="@string/settings"/>
     </group>
 
 </menu>

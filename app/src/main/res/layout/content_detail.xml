@@ -75,7 +75,8 @@
             android:layout_width="30dp"
             android:layout_height="30dp"
             android:layout_alignParentLeft="true"
-            android:layout_margin="16dp"/>
+            android:layout_margin="16dp"
+            android:contentDescription="@string/coin_image"/>
 
         <TextView
             android:id="@+id/tv_crypto_currency"
@@ -83,7 +84,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="Crypto Currency"/>
+            android:text="@string/crypto_currency"/>
 
     </LinearLayout>
 
@@ -106,7 +107,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:text="Last"
+            android:text="@string/last"
             grid:layout_columnWeight="1"
             grid:layout_gravity="fill_horizontal"/>
 
@@ -115,7 +116,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:text="Low"
+            android:text="@string/low"
             grid:layout_columnWeight="1"
             grid:layout_gravity="fill_horizontal"
             />
@@ -125,7 +126,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:text="High"
+            android:text="@string/high"
             grid:layout_columnWeight="1"
             grid:layout_gravity="fill_horizontal"
             />
@@ -135,7 +136,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:text="Last"
+            android:text="@string/last_value"
             android:textColor="@color/white"
             android:textSize="18sp"
             grid:layout_columnWeight="1"
@@ -147,7 +148,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:text="Low"
+            android:text="@string/low_value"
             android:textColor="@color/white"
             android:textSize="18sp"
             grid:layout_columnWeight="1"
@@ -159,7 +160,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:text="High"
+            android:text="@string/high_value"
             android:textColor="@color/white"
             android:textSize="18sp"
             grid:layout_columnWeight="1"
@@ -171,7 +172,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:text="Percentage"
+            android:text="@string/percentage"
             grid:layout_columnWeight="1"
             grid:layout_gravity="fill_horizontal"
             />
@@ -181,7 +182,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:text="Absolute"
+            android:text="@string/absolute"
             grid:layout_columnWeight="1"
             grid:layout_gravity="fill_horizontal"
             />
@@ -191,7 +192,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:text="Volume"
+            android:text="@string/volume"
             grid:layout_columnWeight="1"
             grid:layout_gravity="fill_horizontal"
             />
@@ -201,7 +202,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:text="Percentage Value"
+            android:text="@string/percentage_value"
             android:textColor="@color/white"
             android:textSize="18sp"
             grid:layout_columnWeight="1"
@@ -213,7 +214,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:text="Absolute Value"
+            android:text="@string/absolute_value"
             android:textColor="@color/white"
             android:textSize="18sp"
             grid:layout_columnWeight="1"
@@ -225,7 +226,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:text="Volume Value"
+            android:text="@string/volume_value"
             android:textColor="@color/white"
             android:textSize="18sp"
             grid:layout_columnWeight="1"
