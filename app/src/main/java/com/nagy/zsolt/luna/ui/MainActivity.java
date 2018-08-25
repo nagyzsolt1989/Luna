@@ -1,11 +1,14 @@
 package com.nagy.zsolt.luna.ui;
 
 import android.app.DatePickerDialog;
+import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.os.Bundle;
-import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
@@ -27,7 +30,6 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
@@ -40,6 +42,7 @@ import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
 import com.nagy.zsolt.luna.R;
 import com.nagy.zsolt.luna.data.Constants;
+import com.nagy.zsolt.luna.data.MainViewModel;
 import com.nagy.zsolt.luna.data.api.FetchDataListener;
 import com.nagy.zsolt.luna.data.api.GetAPIRequest;
 import com.nagy.zsolt.luna.data.api.RequestQueueService;
@@ -95,7 +98,7 @@ public class MainActivity extends AppCompatActivity
     private RecyclerView.LayoutManager mLayoutManager;
     private ActionBarDrawerToggle toggle;
     private ArrayList<String> coin, amount, date, values;
-    private List<PortfolioEntry> mPortfoioEntries;
+    private LiveData<List<PortfolioEntry>> mPortfoioEntries;
     private double mSumPortfolio;
     private String prefCurrency;
     private char currencySymbol;
@@ -184,7 +187,7 @@ public class MainActivity extends AppCompatActivity
 
             // Assign adapter to ListView
             mPortfolioRecyclerView.setAdapter(mPortfolioAdapter);
-            retrievePortfolioEntries();
+            setupViewModel();
         }
 
         DividerItemDecoration decoration = new DividerItemDecoration(getApplicationContext(), VERTICAL);
@@ -210,7 +213,6 @@ public class MainActivity extends AppCompatActivity
                 mDb.portfolioDao().deletePortfolio(portfolioEntries.get(position));
                 values.remove(position);
 
-                retrievePortfolioEntries();
                 refreshPortfolioData();
                 calculateSumPortfolio();
             }
@@ -295,9 +297,15 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
-    private void retrievePortfolioEntries() {
-        mPortfoioEntries = mDb.portfolioDao().loadAllPortfolioEntries();
-        mPortfolioAdapter.setPortfolioEntries(mPortfoioEntries);
+    private void setupViewModel() {
+        MainViewModel viewModel = ViewModelProviders.of(this).get(MainViewModel.class);
+        viewModel.getPortfolioEntries().observe(this, new Observer<List<PortfolioEntry>>() {
+            @Override
+            public void onChanged(@Nullable List<PortfolioEntry> portfolioEntries) {
+                Log.d("onChanged", "Updating list of portfolio entries from LiveData and ViewModel");
+                mPortfolioAdapter.setPortfolioEntries(portfolioEntries);
+            }
+        });
     }
 
     private void showTransactionDialog() {
@@ -355,8 +363,6 @@ public class MainActivity extends AppCompatActivity
                     snackBarView.setBackgroundColor(getResources().getColor(R.color.colorSnackbar));
                     snackbar.show();
                 } else {
-//                    coin.add(mCurrencySpinner.getSelectedItem().toString());
-//                    amount.add(mAmount.getText().toString());
 
                     //Save Transaction to the Database
                     PortfolioEntry portfolioEntry = new PortfolioEntry(mCurrencySpinner.getSelectedItem().toString(), mAmount.getText().toString(), mTransactionDate.getText().toString());
@@ -393,7 +399,7 @@ public class MainActivity extends AppCompatActivity
 
                     GetAPIRequest getapiRequest = new GetAPIRequest();
                     getapiRequest.request(MainActivity.this, fetchGetResultListener, url);
-//            Toast.makeText(getContext(), "GET API called", Toast.LENGTH_SHORT).show();
+
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -419,7 +425,7 @@ public class MainActivity extends AppCompatActivity
                     double value = amount * price;
                     DecimalFormat df = new DecimalFormat("#.##");
                     values.add(Double.toString(Double.valueOf(df.format(value))));
-                    retrievePortfolioEntries();
+                    setupViewModel();
                     calculateSumPortfolio();
                 } else {
                     RequestQueueService.showAlert(getString(R.string.noDataAlert), MainActivity.this);
@@ -504,7 +510,7 @@ public class MainActivity extends AppCompatActivity
                     // Assign adapter to ListView
                     mPortfolioRecyclerView.setAdapter(mPortfolioAdapter);
 
-                    retrievePortfolioEntries();
+                    setupViewModel();
 
                     calculateSumPortfolio();
 
@@ -590,7 +596,7 @@ public class MainActivity extends AppCompatActivity
 
                     // Assign adapter to ListView
                     mPortfolioRecyclerView.setAdapter(mPortfolioAdapter);
-                    retrievePortfolioEntries();
+                    setupViewModel();
                 }
                 recreate();
             } catch (Exception e) {

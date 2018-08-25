@@ -29,6 +29,8 @@ android {
 }
 
 dependencies {
+    def lifecycle_version = "1.1.1"
+
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation "com.android.support:appcompat-v7:$rootProject.supportLibraryVersion"
     implementation "com.android.support:recyclerview-v7:$rootProject.supportLibraryVersion"
@@ -47,6 +49,8 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.8.0'
     implementation 'android.arch.persistence.room:runtime:1.0.0'
     annotationProcessor "android.arch.persistence.room:compiler:1.0.0"
+    implementation "android.arch.lifecycle:extensions:$lifecycle_version"
+    annotationProcessor "android.arch.lifecycle:compiler:$lifecycle_version"
     implementation 'com.diogobernardino:williamchart:2.5.0'
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.8.1'
     testImplementation 'junit:junit:4.12'
