@@ -41,6 +41,7 @@ import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
 import com.nagy.zsolt.luna.R;
+import com.nagy.zsolt.luna.data.AppExecutors;
 import com.nagy.zsolt.luna.data.Constants;
 import com.nagy.zsolt.luna.data.MainViewModel;
 import com.nagy.zsolt.luna.data.api.FetchDataListener;
@@ -210,8 +211,9 @@ public class MainActivity extends AppCompatActivity
 
                 int position = viewHolder.getAdapterPosition();
                 List<PortfolioEntry> portfolioEntries = mPortfolioAdapter.getPortfolioEntries();
-                mDb.portfolioDao().deletePortfolio(portfolioEntries.get(position));
                 values.remove(position);
+                mDb.portfolioDao().deletePortfolio(portfolioEntries.get(position));
+
 
                 refreshPortfolioData();
                 calculateSumPortfolio();
@@ -267,7 +269,6 @@ public class MainActivity extends AppCompatActivity
         }
         if (id == R.id.action_add) {
             showTransactionDialog();
-            mPortfolioAdapter.notifyDataSetChanged();
             return true;
         }
 
@@ -301,9 +302,10 @@ public class MainActivity extends AppCompatActivity
         MainViewModel viewModel = ViewModelProviders.of(this).get(MainViewModel.class);
         viewModel.getPortfolioEntries().observe(this, new Observer<List<PortfolioEntry>>() {
             @Override
-            public void onChanged(@Nullable List<PortfolioEntry> portfolioEntries) {
-                Log.d("onChanged", "Updating list of portfolio entries from LiveData and ViewModel");
-                mPortfolioAdapter.setPortfolioEntries(portfolioEntries);
+            public void onChanged(@Nullable final List<PortfolioEntry> portfolioEntries) {
+                if (values.size() > 0) {
+                    mPortfolioAdapter.setPortfolioEntries(portfolioEntries);
+                }
             }
         });
     }
@@ -365,11 +367,18 @@ public class MainActivity extends AppCompatActivity
                 } else {
 
                     //Save Transaction to the Database
-                    PortfolioEntry portfolioEntry = new PortfolioEntry(mCurrencySpinner.getSelectedItem().toString(), mAmount.getText().toString(), mTransactionDate.getText().toString());
-                    mDb.portfolioDao().insertPortfolio(portfolioEntry);
+                    final PortfolioEntry portfolioEntry = new PortfolioEntry(mCurrencySpinner.getSelectedItem().toString(), mAmount.getText().toString(), mTransactionDate.getText().toString());
+
+                    getCoinPrice(mCurrencySpinner.getSelectedItem().toString());
+                    AppExecutors.getInstance().diskIO().execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            mDb.portfolioDao().insertPortfolio(portfolioEntry);
+                        }
+                    });
 
                     refreshPortfolioData();
-                    getCoinPrice(mCurrencySpinner.getSelectedItem().toString());
+
 
                     dialog.dismiss();
                 }
@@ -421,7 +430,6 @@ public class MainActivity extends AppCompatActivity
                 if (data != null) {
                     double amount = Double.parseDouble(mAmount.getText().toString());
                     double price = data.optDouble(prefCurrency);
-
                     double value = amount * price;
                     DecimalFormat df = new DecimalFormat("#.##");
                     values.add(Double.toString(Double.valueOf(df.format(value))));

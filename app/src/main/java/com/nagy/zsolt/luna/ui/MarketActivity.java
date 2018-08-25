@@ -3,6 +3,7 @@ package com.nagy.zsolt.luna.ui;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
@@ -65,6 +66,7 @@ public class MarketActivity extends AppCompatActivity implements NavigationView.
     ArrayList<String> coin, mDailyChange, mMarketValue;
     private SharedPreferences settings;
     private Tracker mTracker;
+    private Parcelable state;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -232,6 +234,28 @@ public class MarketActivity extends AppCompatActivity implements NavigationView.
         }.executeOnExecutor(android.os.AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
+    @Override
+    protected void onSaveInstanceState(Bundle instanceState) {
+        super.onSaveInstanceState(instanceState);
+        Parcelable state = mMarketListView.onSaveInstanceState();
+        instanceState.putParcelable("state", state);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle outstate) {
+        super.onRestoreInstanceState(outstate);
+        state = outstate.getParcelable("state");
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        String name = "MarketActivity";
+        Log.i("MarketActivity", "Setting screen name: " + name);
+        mTracker.setScreenName("Image~" + name);
+        mTracker.send(new HitBuilders.ScreenViewBuilder().build());
+    }
+
     //Implementing interfaces of FetchDataListener for GET api request
     FetchDataListener fetchGetResultListener = new FetchDataListener() {
         @Override
@@ -264,6 +288,11 @@ public class MarketActivity extends AppCompatActivity implements NavigationView.
 
                     // Assign adapter to ListView
                     mMarketListView.setAdapter(mMarketAdapter);
+
+                    if (state != null) {
+                        mMarketListView.onRestoreInstanceState(state);
+                    }
+
 
                     mMarketListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                         @Override
@@ -316,15 +345,6 @@ public class MarketActivity extends AppCompatActivity implements NavigationView.
     public void onDestroy() {
         PreferenceManager.getDefaultSharedPreferences(this).unregisterOnSharedPreferenceChangeListener(this);
         super.onDestroy();
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        String name = "MarketActivity";
-        Log.i("MarketActivity", "Setting screen name: " + name);
-        mTracker.setScreenName("Image~" + name);
-        mTracker.send(new HitBuilders.ScreenViewBuilder().build());
     }
 
 }
